@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This XML file provides all the text to be used when the application
+    is to be displayed in SPANISH.
+-->
+<properties>
+    <property_list>
+
+        <!-- SPANISH LANGUAGE SETTINGS FOR DESKTOP JAVA FRAMEWORK CONTROLS -->
+
+        <!-- WELCOME DIALOG TEXT -->
+        <property name="WELCOME_DIALOG_TITLE"               value="Bienvenidos a las Horas de Oficina"></property>
+        <property name="WELCOME_DIALOG_RECENT_WORK_LABEL"   value="Trabajo Reciente"></property>
+        <property name="WELCOME_DIALOG_NEW_BUTTON_TEXT"  value="Creé Nuevas Horas de Oficina"></property>
+
+        <!-- GENERIC APP ERROR MESSAGES -->
+        <property name="APP_ERROR_TITLE"            value="Error de applicación"></property>
+        <property name="APP_ERROR_CONTENT"          value="Un error ocurrío en la applicación"></property>
+
+        <!-- PROPERTIES ERROR MESSAGES -->
+        <property name="PROPERTIES_ERROR_TITLE"     value="Error de propiedades archivo"></property>
+        <property name="PROPERTIES_ERROR_CONTENT"   value="fue un error de cargando un propiedades"></property>
+
+        <!-- FILE TOOLBAR TOOLTIPS -->
+        <property name="NEW_BUTTON_TOOLTIP"         value="Nueva Horas de Oficina"></property>
+        <property name="LOAD_BUTTON_TOOLTIP"        value="Carga Horas de Oficina"></property>
+        <property name="CLOSE_BUTTON_TOOLTIP"       value="Cerca Horas de Oficina"></property>
+        <property name="SAVE_BUTTON_TOOLTIP"        value="Salva Horas de Oficina"></property>
+        <property name="EXPORT_BUTTON_TOOLTIP"      value="Exporta Horas de Oficina"></property>
+        <property name="EXIT_BUTTON_TOOLTIP"        value="Salga"></property>
+
+        <!-- CLIPBOARD TOOLBAR TOOLTIPS -->
+        <property name="CUT_BUTTON_TOOLTIP"         value="Cortar"></property>
+        <property name="COPY_BUTTON_TOOLTIP"        value="Copiar"></property>
+        <property name="PASTE_BUTTON_TOOLTIP"       value="Pegar"></property>
+
+        <!-- UNDO TOOLBAR TOOLTIPS -->
+        <property name="UNDO_BUTTON_TOOLTIP"        value="Deshacer"></property>
+        <property name="REDO_BUTTON_TOOLTIP"        value="Rehacer"></property>
+
+        <!-- HELP TOOLBAR TOOLTIPS -->
+        <property name="HELP_BUTTON_TOOLTIP"        value="Ayuda"></property>
+        <property name="LANGUAGE_BUTTON_TOOLTIP"    value="Cambio la Lengua"></property>
+        <property name="ABOUT_BUTTON_TOOLTIP"       value="Sobre"></property>
+
+        <!-- NEW FEEDBACK DIALOGS -->	
+        <property name="NEW_SUCCESS_TITLE"      value="Nueva Completo"></property>
+        <property name="NEW_SUCCESS_CONTENT"	value="Trabajo creado pero todavía no salvando">property>
+        <property name="NEW_ERROR_TITLE"        value="Advertencia:Error"></property>
+        <property name="NEW_ERROR_CONTENT"      value="Un error ocurrió cuando creando nuevo trabajo"></property>
+
+        <!-- LOAD FEEDBACK DIALOGS -->
+        <property name="LOAD_WORK_TITLE"        value="Carga trabajo"></property>
+        <property name="LOAD_SUCCESS_TITLE"     value="Carga Completo"></property>
+        <property name="LOAD_SUCCESS_CONTENT"   value="El archivo se ha cargado correctamente y ahora se puede editar."></property>
+        <property name="LOAD_ERROR_TITLE"       value="Error de Carga"></property>        
+        <property name="LOAD_ERROR_CONTENT"     value="La carga ha fallado. Es probable que haya un problema de formato de archivo."></property>
+
+        <!-- SAVE FEEDBACK DIALOGS -->
+        <property name="SAVE_WORK_TITLE"        value="Salva Trabajo"></property>
+        <property name="SAVE_SUCCESS_TITLE"     value="Salva Completo"></property>
+        <property name="SAVE_SUCCESS_CONTENT"   value="El archivo está salvado."></property>
+        <property name="SAVE_ERROR_TITLE"       value="Error de Salva"></property>
+        <property name="SAVE_ERROR_CONTENT"     value="El ahorro ha fallado. Probablemente debido a un problema de acceso a archivos."></property>
+        <property name="SAVE_VERIFY_TITLE"	value="¿guardar el trabajo no guardado?"></property>
+        <property name="SAVE_VERIFY_CONTENT"	value="¿desea guardar primero el trabajo no guardado?"></property>
+
+        <!-- ABOUT DIALOG -->
+        <property name="ABOUT_TITLE"            value="Sobre de OH"></property>
+        <property name="ABOUT_CONTENT"          value="OH, el Gerente de horas de oficina-Depuración de Empresas- Â© 2018"></property>
+
+
+        <!-- SPANISH LANGUAGE SETTINGS SPECIFICALLY FOR TDLM CONTROLS -->
+
+        <!-- LANGUAGE-DEPENDENT TEXT FOR OH WORKSPACE CONTROLS -->
+        <property name="OH_TAS_HEADER_LABEL_TEXT"           value="Asistentes"></property>
+        <property name="OH_ADD_TA_BUTTON_TEXT"              value="Agregar TA"></property>
+        <property name="OH_OFFICE_HOURS_HEADER_LABEL_TEXT"  value="Horas De Oficina"></property>
+        <property name="OH_NAME_TABLE_COLUMN_TEXT"          value="Nombre"></property>
+        <property name="OH_EMAIL_TABLE_COLUMN_TEXT"         value="Email"></property>
+        <property name="OH_NAME_TEXT_FIELD_TEXT"            value="Nombre"></property>
+	<property name="OH_EMAIL_TEXT_FIELD_TEXT"           value="Email"></property>
+	<property name="OH_SLOTS_TABLE_COLUMN_TEXT"         value="Espacio De Tiempo"></property>
+        <property name="OH_START_TIME_TABLE_COLUMN_TEXT"    value="Tiempo De Comienzo"></property>
+        <property name="OH_END_TIME_TABLE_COLUMN_TEXT"      value="Tiempo De Finalización"></property>
+        <property name="OH_MONDAY_TABLE_COLUMN_TEXT"        value="Lunes"></property>
+        <property name="OH_TUESDAY_TABLE_COLUMN_TEXT"       value="Martes"></property>
+        <property name="OH_WEDNESDAY_TABLE_COLUMN_TEXT"     value="Miércoles"></property>
+        <property name="OH_THURSDAY_TABLE_COLUMN_TEXT"      value="Jueves"></property>
+        <property name="OH_FRIDAY_TABLE_COLUMN_TEXT"        value="Viernes"></property>
+
+        <!-- TO SWITCH BACK TO ANOTHER LANGUAGE -->
+        <property name="LANGUAGE_DIALOG_TITLE"          value="Selección de lengua de App"></property>
+        <property name="LANGUAGE_DIALOG_HEADER_TEXT"    value="Elegir una Lengua"></property>
+        <property name="LANGUAGE_DIALOG_CONTENT_TEXT"   value="Elegir una Lengua por el interfaz de usuario."></property>
+
+        <property name="WORK_FILE_EXT"          value="ta"></property>
+	<property name="WORK_FILE_EXT_DESC"     value="Archivos de Asistentes"></property>
+
+    </property_list>
+    
+    <property_options_list>
+        <property_options name="LANGUAGE_OPTIONS">
+            <option>English</option>
+        </property_options>
+    </property_options_list>
+</properties>
