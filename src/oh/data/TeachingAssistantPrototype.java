@@ -27,6 +27,12 @@ public class TeachingAssistantPrototype {
         timeSlot = new SimpleIntegerProperty(0);
         type = new SimpleStringProperty("Undergraduate");
     }
+    public TeachingAssistantPrototype(String initName, String initEmail, String initType) {
+        name = new SimpleStringProperty(initName);
+        email = new SimpleStringProperty(initEmail);
+        timeSlot = new SimpleIntegerProperty(0);
+        type = new SimpleStringProperty(initType);
+    }
 
     // ACCESSORS AND MUTATORS FOR THE PROPERTIES
 
@@ -73,5 +79,10 @@ public class TeachingAssistantPrototype {
     @Override
     public String toString() {
         return name.getValue();
+    }
+    @Override
+    public TeachingAssistantPrototype clone(){
+        TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name.getValue(),email.getValue(),type.getValue());
+        return ta;
     }
 }

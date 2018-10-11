@@ -1,10 +1,15 @@
 package oh.data;
 
+import djf.modules.AppGUIModule;
 import java.util.ArrayList;
 import java.util.HashMap;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.RadioButton;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_ALL;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_G;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_UG;
 import oh.transactions.AddTA_OHTransaction;
 
 /**
@@ -38,6 +43,12 @@ public class TimeSlot {
     }
     public HashMap<DayOfWeek, StringProperty> getDayText(){
         return dayText;
+    }
+    public void setTAs(HashMap<DayOfWeek, ArrayList<TeachingAssistantPrototype>> tasMap){
+        this.tas = tasMap;
+    }
+    public void setDayText(HashMap<DayOfWeek, StringProperty> dayTextMap){
+        this.dayText = dayTextMap;
     }
     
 
@@ -264,40 +275,6 @@ public class TimeSlot {
             dayText.get(dow).setValue("");
         }
     }
-    public void removeTA(String dow){
-        String taNames = "";
-        if(dow.equalsIgnoreCase("MONDAY")){
-            tas.get(DayOfWeek.MONDAY).remove(tas.get(DayOfWeek.MONDAY).size()-1);
-            for (int i = 0; i < tas.get(DayOfWeek.MONDAY).size(); i++) {
-                taNames = taNames + tas.get(DayOfWeek.MONDAY).get(i)+"\n";
-            }
-            dayText.get(DayOfWeek.MONDAY).setValue(taNames);  
-        }else if(dow.equalsIgnoreCase("TUESDAY")){
-            tas.get(DayOfWeek.TUESDAY).remove(tas.get(DayOfWeek.TUESDAY).size()-1);
-            for (int i = 0; i < tas.get(DayOfWeek.TUESDAY).size(); i++) {
-                taNames = taNames + tas.get(DayOfWeek.TUESDAY).get(i)+"\n";
-            }
-            dayText.get(DayOfWeek.TUESDAY).setValue(taNames);
-        }else if(dow.equalsIgnoreCase("WEDNESDAY")){
-            tas.get(DayOfWeek.WEDNESDAY).remove(tas.get(DayOfWeek.WEDNESDAY).size()-1);
-            for (int i = 0; i < tas.get(DayOfWeek.WEDNESDAY).size(); i++) {
-                taNames = taNames + tas.get(DayOfWeek.WEDNESDAY).get(i)+"\n";
-            }
-            dayText.get(DayOfWeek.WEDNESDAY).setValue(taNames);
-        }else if(dow.equalsIgnoreCase("THURSDAY")){
-            tas.get(DayOfWeek.THURSDAY).remove(tas.get(DayOfWeek.THURSDAY).size()-1);
-            for (int i = 0; i < tas.get(DayOfWeek.THURSDAY).size(); i++) {
-                taNames = taNames + tas.get(DayOfWeek.THURSDAY).get(i)+"\n";
-            }
-            dayText.get(DayOfWeek.THURSDAY).setValue(taNames);
-        }else if(dow.equalsIgnoreCase("FRIDAY")){
-            tas.get(DayOfWeek.FRIDAY).remove(tas.get(DayOfWeek.FRIDAY).size()-1);
-            for (int i = 0; i < tas.get(DayOfWeek.FRIDAY).size(); i++) {
-                taNames = taNames + tas.get(DayOfWeek.FRIDAY).get(i)+"\n";
-            }
-            dayText.get(DayOfWeek.FRIDAY).setValue(taNames);
-        }
-    }
     public void showGrad(ObservableList<TeachingAssistantPrototype> taList){        
         ArrayList<String> gTANames = new ArrayList();
         for (int i = 0; i < taList.size(); i++) {
@@ -451,5 +428,24 @@ public class TimeSlot {
             
         }
         dayText.get(DayOfWeek.FRIDAY).setValue(taNames);
+    }
+    public TimeSlot clone(){
+        TimeSlot newSlot = new TimeSlot(startTime.getValue(),endTime.getValue());
+        for (int i = 0; i < tas.get(DayOfWeek.MONDAY).size(); i++) {
+            newSlot.addToTAs(tas.get(DayOfWeek.MONDAY).get(i).clone(),2);
+        }
+        for (int i = 0; i < tas.get(DayOfWeek.TUESDAY).size(); i++) {
+            newSlot.addToTAs(tas.get(DayOfWeek.TUESDAY).get(i).clone(),3);
+        }
+        for (int i = 0; i < tas.get(DayOfWeek.WEDNESDAY).size(); i++) {
+            newSlot.addToTAs(tas.get(DayOfWeek.WEDNESDAY).get(i).clone(),4);
+        }
+        for (int i = 0; i < tas.get(DayOfWeek.THURSDAY).size(); i++) {
+            newSlot.addToTAs(tas.get(DayOfWeek.THURSDAY).get(i).clone(),5);
+        }
+        for (int i = 0; i < tas.get(DayOfWeek.FRIDAY).size(); i++) {
+            newSlot.addToTAs(tas.get(DayOfWeek.FRIDAY).get(i).clone(),6);
+        }
+        return newSlot;
     }
 }

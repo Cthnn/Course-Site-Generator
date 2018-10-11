@@ -18,22 +18,22 @@
         {
             "time":"9_00am",
             "day":"MONDAY",
-            "name":"ethan"
+            "name":"tester"
         },
         {
             "time":"9_00am",
             "day":"MONDAY",
-            "name":"tester"
-        },
-        {
-            "time":"9_30am",
-            "day":"MONDAY",
             "name":"ethan"
         },
         {
             "time":"9_30am",
             "day":"MONDAY",
             "name":"tester"
+        },
+        {
+            "time":"9_30am",
+            "day":"MONDAY",
+            "name":"ethan"
         },
         {
             "time":"10_00am",
@@ -43,22 +43,22 @@
         {
             "time":"10_30am",
             "day":"MONDAY",
-            "name":"ethan"
+            "name":"tester"
         },
         {
             "time":"10_30am",
             "day":"MONDAY",
-            "name":"tester"
-        },
-        {
-            "time":"11_00am",
-            "day":"MONDAY",
             "name":"ethan"
         },
         {
             "time":"11_00am",
             "day":"MONDAY",
             "name":"tester"
+        },
+        {
+            "time":"11_00am",
+            "day":"MONDAY",
+            "name":"ethan"
         },
         {
             "time":"11_30am",
@@ -73,12 +73,12 @@
         {
             "time":"12_30pm",
             "day":"MONDAY",
-            "name":"ethan"
+            "name":"tester"
         },
         {
             "time":"12_30pm",
             "day":"MONDAY",
-            "name":"tester"
+            "name":"ethan"
         },
         {
             "time":"1_00pm",

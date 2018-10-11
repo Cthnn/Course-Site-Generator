@@ -84,18 +84,16 @@ public class OfficeHoursFiles implements AppFileComponent {
             JsonObject jsonTA = jsonTAArray.getJsonObject(i);
             String name = jsonTA.getString(JSON_NAME);
             String email = jsonTA.getString(JSON_EMAIL);
-            TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email);
-            ta.setType("Undergraduate");
+            TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email,"Undergraduate");
             dataManager.addTA(ta);
         }
-        // NOW LOAD ALL THE UNDERGRAD TAs
+        // NOW LOAD ALL THE GRAD TAs
         jsonTAArray = json.getJsonArray(JSON_GRAD_TAS);
         for (int i = 0; i < jsonTAArray.size(); i++) {
             JsonObject jsonTA = jsonTAArray.getJsonObject(i);
             String name = jsonTA.getString(JSON_NAME);
             String email = jsonTA.getString(JSON_EMAIL);
-            TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email);
-            ta.setType("Graduate");
+            TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email,"Graduate");
             dataManager.addTA(ta);
         }
         //LOAD ALL OFFICE HOURS

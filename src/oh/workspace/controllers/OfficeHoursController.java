@@ -6,14 +6,18 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TablePosition;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -23,6 +27,9 @@ import oh.OfficeHoursApp;
 import static oh.OfficeHoursPropertyType.OH_NAME_TEXT_FIELD;
 import static oh.OfficeHoursPropertyType.OH_EMAIL_TEXT_FIELD;
 import static oh.OfficeHoursPropertyType.OH_OFFICE_HOURS_TABLE_VIEW;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_ALL;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_G;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_UG;
 import static oh.OfficeHoursPropertyType.OH_TAS_TABLE_VIEW;
 import oh.data.OfficeHoursData;
 import oh.data.TeachingAssistantPrototype;
@@ -37,6 +44,7 @@ import oh.transactions.AddTA_Transaction;
 public class OfficeHoursController {
 
     OfficeHoursApp app;
+    private String type = "";
     private static final Pattern VALID_EMAIL_ADDRESS_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 
     public OfficeHoursController(OfficeHoursApp initApp) {
@@ -58,23 +66,23 @@ public class OfficeHoursController {
         String name = nameTF.getText();
         TextField emailTF = (TextField) gui.getGUINode(OH_EMAIL_TEXT_FIELD);
         String email = emailTF.getText();
+        OfficeHoursData data = (OfficeHoursData)app.getDataComponent();
         TableColumn nameCol = (TableColumn)taTableView.getColumns().get(0);
         TableColumn emailCol = (TableColumn)taTableView.getColumns().get(1);
         if(OfficeHoursController.validate(email)){
-            for(Object o: taTableView.getItems()){
-                if(name.equals((String)nameCol.getCellData(o))){
+            for(int i = 0; i < data.getAll().size();i++){
+                if(name.equals(data.getAll().get(i).getName())){
                     dupliName = true;
                 }
             }
             if(!dupliName){
-                for(Object o: taTableView.getItems()){
-                if(email.equals((String)emailCol.getCellData(o))){
+                for(int i = 0; i < data.getAll().size();i++){
+                if(email.equals(data.getAll().get(i).getEmail())){
                     dupliEmail = true;
                 }
             }
                 if(!dupliEmail){
-                    OfficeHoursData data = (OfficeHoursData) app.getDataComponent();
-                    TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email);
+                    TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email,type);
                     AddTA_Transaction addTATransaction = new AddTA_Transaction(data, ta);
                     app.processTransaction(addTATransaction);
                     
@@ -124,11 +132,11 @@ public class OfficeHoursController {
         ObservableList<TeachingAssistantPrototype> all = data.getAll();
         ObservableList<TeachingAssistantPrototype> undergrad = FXCollections.observableArrayList();
         ObservableList<TeachingAssistantPrototype> grad = FXCollections.observableArrayList();
-        for (int i = 0; i < data.getAll().size(); i++) {
-            if (data.getAll().get(i).getType().equalsIgnoreCase("undergraduate")) {
-                undergrad.add(data.getAll().get(i));
-            }else if(data.getAll().get(i).getType().equalsIgnoreCase("graduate")){
-                grad.add(data.getAll().get(i));
+        for (int i = 0; i < all.size(); i++) {
+            if (all.get(i).getType().equalsIgnoreCase("undergraduate")) {
+                undergrad.add(all.get(i));
+            }else if(all.get(i).getType().equalsIgnoreCase("graduate")){
+                grad.add(all.get(i));
             }
         }
         data.setGraduate(grad);
@@ -195,5 +203,8 @@ public class OfficeHoursController {
     public static boolean validate(String emailStr) {
         Matcher matcher = VALID_EMAIL_ADDRESS_REGEX .matcher(emailStr);
         return matcher.find();
+    }
+    public void setType(String type){
+        this.type = type;
     }
 }

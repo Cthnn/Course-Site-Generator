@@ -79,9 +79,14 @@
         <property name="OH_NAME_TABLE_COLUMN_TEXT"          value="Nombre"></property>
         <property name="OH_EMAIL_TABLE_COLUMN_TEXT"         value="Email"></property>
         <property name="OH_TYPE_TABLE_COLUMN_TEXT"          value="Tipo"></property>
-        <property name="OH_TAS_RADIO_BUTTON_ALL_TEXT"            value="Todo"></property>
-        <property name="OH_TAS_RADIO_BUTTON_UG_TEXT"             value="Estudiante Universitario"></property>
-        <property name="OH_TAS_RADIO_BUTTON_G_TEXT"              value="Graduado"></property>
+        <property name="OH_TAS_RADIO_BUTTON_ALL_TEXT"       value="Todo"></property>
+        <property name="OH_TAS_RADIO_BUTTON_UG_TEXT"        value="Estudiante Universitario"></property>
+        <property name="OH_TAS_RADIO_BUTTON_G_TEXT"         value="Graduado"></property>
+        <property name="OH_DIALOG_RADIO_BUTTON_UG_TEXT"     value="Estudiante Universitario"></property>
+        <property name="OH_DIALOG_RADIO_BUTTON_G_TEXT"      value="Graduado"></property>
+        <property name="OH_NAME_LABEL_TEXT"                 value="Nombre:"></property>
+	<property name="OH_EMAIL_LABEL_TEXT"                value="Email:"></property>
+        <property name="OH_TYPE_LABEL_TEXT"                 value="Tipo:"></property>
 	<property name="OH_NAME_TEXT_FIELD_TEXT"            value="Nombre"></property>
 	<property name="OH_EMAIL_TEXT_FIELD_TEXT"           value="Email"></property>
         <property name="OH_SLOTS_TABLE_COLUMN_TEXT"         value="Espacio De Tiempo"></property>

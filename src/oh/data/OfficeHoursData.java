@@ -6,9 +6,13 @@ import djf.modules.AppGUIModule;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.collections.FXCollections;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableView;
 import oh.OfficeHoursApp;
 import static oh.OfficeHoursPropertyType.OH_OFFICE_HOURS_TABLE_VIEW;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_ALL;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_G;
+import static oh.OfficeHoursPropertyType.OH_TAS_RADIO_BUTTON_UG;
 import static oh.OfficeHoursPropertyType.OH_TAS_TABLE_VIEW;
 import oh.data.TimeSlot.DayOfWeek;
 
@@ -147,28 +151,116 @@ public class OfficeHoursData implements AppDataComponent {
     public boolean isTASelected() {
         AppGUIModule gui = app.getGUIModule();
         TableView tasTable = (TableView)gui.getGUINode(OH_TAS_TABLE_VIEW);
-        return tasTable.getSelectionModel().getSelectedItem() != null;
+        if (tasTable.getSelectionModel().getSelectedItem() != null) {
+            return true;
+        }else{
+            return false;
+        }
     }
     
     public void addTA(TeachingAssistantPrototype ta) {
-        AppGUIModule gui = app.getGUIModule();
-        TableView<TeachingAssistantPrototype> taTableView = (TableView)gui.getGUINode(OH_TAS_TABLE_VIEW);
-        if (!this.teachingAssistants.contains(ta)){
+        boolean exists = false;
+        for (int i = 0; i < all.size(); i++) {
+            if (ta.getName().equals(all.get(i).getName()) || ta.getEmail().equals(all.get(i).getEmail())) {
+                exists = true;
+            }
+        }
+        if (!exists) {
             this.all.add(ta);
+            if(ta.getType().equalsIgnoreCase("undergraduate")){
+                this.undergrad.add(ta);
+            }else if(ta.getType().equalsIgnoreCase("graduate")){
+                this.grad.add(ta);
+            }  
+        }else{
+            TeachingAssistantPrototype taClone = ta.clone();
+            int index = 0;
+            for (int i = 0; i < ta.getEmail().length(); i++) {
+                if (ta.getEmail().charAt(i) == '@') {
+                    index = i;
+                    break;
+                }
+            }
+            int counter = 1;
+            String taName = ta.getName();
+            String taEmailOne = ta.getEmail().substring(0,index);
+            String taEmailRest = ta.getEmail().substring(index,ta.getEmail().length());
+            String newEmail = taEmailOne + counter + taEmailRest;
+            taClone.setName(taName + counter);
+            taClone.setEmail(newEmail);
+            exists = false;
+            for (int i = 0; i < all.size(); i++) {
+                if (taClone.getName().equals(all.get(i).getName()) || taClone.getEmail().equals(all.get(i).getEmail())) {
+                    exists = true;
+                }
+            }
+            counter++;
+            while(exists){
+                newEmail = taEmailOne+counter+taEmailRest;
+                taClone.setName(taName + counter);
+                taClone.setEmail(newEmail);
+                boolean existsIn = false;
+                for (int i = 0; i < all.size(); i++) {
+                    if (taClone.getName().equals(all.get(i).getName()) || taClone.getEmail().equals(all.get(i).getEmail())) {
+                        existsIn = true;
+                    }
+                }
+                if (existsIn) {
+                    counter++;
+                }else{
+                    exists = false;
+                }
+                
+            }
+            this.all.add(taClone);
+            if(taClone.getType().equalsIgnoreCase("undergraduate")){
+                this.undergrad.add(taClone);
+            }else if(taClone.getType().equalsIgnoreCase("graduate")){
+                this.grad.add(taClone);
+            }      
         }
-        if(ta.getType().equalsIgnoreCase("undergraduate")){
-            this.undergrad.add(ta);
-        }else if(ta.getType().equalsIgnoreCase("graduate")){
-            this.grad.add(ta);
+        AppGUIModule gui = app.getGUIModule();
+        RadioButton allRB = (RadioButton)gui.getGUINode(OH_TAS_RADIO_BUTTON_ALL);
+        RadioButton ugRB = (RadioButton)gui.getGUINode(OH_TAS_RADIO_BUTTON_UG);
+        RadioButton gRB = (RadioButton)gui.getGUINode(OH_TAS_RADIO_BUTTON_G);
+        if (allRB.isSelected()) {
+            this.setCurrentToAll();
+        }else if(ugRB.isSelected()){
+            this.setCurrentToUG();
+        }else if(gRB.isSelected()){
+            this.setCurrentToG();
         }
+        
     }
     
     public void removeTA(TeachingAssistantPrototype ta) {
         // REMOVE THE TA FROM THE LIST OF TAs
         this.all.remove(ta);
         this.teachingAssistants = this.all;
-        
+        if (ta.getType().equalsIgnoreCase("undergraduate")){
+            undergrad.remove(ta);
+        }else if(ta.getType().equalsIgnoreCase("graduate")){
+            grad.remove(ta);
+        }
         // AND REMOVE THE TA FROM ALL THEIR OFFICE HOURS
+        AppGUIModule gui = app.getGUIModule();
+        TableView ohTableView = (TableView) gui.getGUINode(OH_OFFICE_HOURS_TABLE_VIEW);
+        for (int i = 0; i < ohTableView.getItems().size(); i++) {
+            for (int j = 2; j < 7; j++) {
+                ((TimeSlot)ohTableView.getItems().get(i)).removingTA(ta, j);
+            }
+        }
+        RadioButton allRB = (RadioButton)gui.getGUINode(OH_TAS_RADIO_BUTTON_ALL);
+        RadioButton ugRB = (RadioButton)gui.getGUINode(OH_TAS_RADIO_BUTTON_UG);
+        RadioButton gRB = (RadioButton)gui.getGUINode(OH_TAS_RADIO_BUTTON_G);
+        if (allRB.isSelected()) {
+            this.setCurrentToAll();
+        }else if(ugRB.isSelected()){
+            this.setCurrentToUG();
+        }else if(gRB.isSelected()){
+            this.setCurrentToG();
+        }
+        ohTableView.refresh();
     }
     public boolean isDayOfWeekColumn(int columnNumber) {
         return columnNumber >= 2;
@@ -236,6 +328,8 @@ public class OfficeHoursData implements AppDataComponent {
             officeHours.get(i).showUndergrad(all);
         }
         
+        ohTableView.refresh();
+        
     }
     public void setCurrentToAll(){
         AppGUIModule gui = app.getGUIModule();
@@ -245,6 +339,7 @@ public class OfficeHoursData implements AppDataComponent {
         for (int i = 0; i < officeHours.size(); i++) {
             officeHours.get(i).showAll();
         }
+        ohTableView.refresh();
     }
     public void setCurrentToG(){
         AppGUIModule gui = app.getGUIModule();
@@ -254,8 +349,56 @@ public class OfficeHoursData implements AppDataComponent {
         for (int i = 0; i < officeHours.size(); i++) {
             officeHours.get(i).showGrad(all);
         }
+        ohTableView.refresh();
     }
     public ObservableList<TimeSlot> getOH(){
         return officeHours;
     }
+    public void setOH(ObservableList<TimeSlot> officeHours, String type){
+        AppGUIModule gui = app.getGUIModule();
+        TableView<TeachingAssistantPrototype> ohTableView = (TableView)gui.getGUINode(OH_OFFICE_HOURS_TABLE_VIEW);
+        this.officeHours.clear();
+        for (int i = 0; i < officeHours.size(); i++) {
+            this.officeHours.add(officeHours.get(i));
+        }
+        if (type.equalsIgnoreCase("all")) {
+            for (int i = 0; i < officeHours.size(); i++) {
+            this.officeHours.get(i).showAll();
+        }
+        }else if(type.equalsIgnoreCase("undergraduate")){
+            for (int i = 0; i < officeHours.size(); i++) {
+                this.officeHours.get(i).showUndergrad(all);
+            }
+        }else if(type.equalsIgnoreCase("graduate")){
+            for (int i = 0; i < officeHours.size(); i++) {
+                this.officeHours.get(i).showGrad(all);
+            }
+        }
+        
+        ohTableView.refresh();
+    }
+    public void sortTAs(){
+        int j = 0; 
+        TeachingAssistantPrototype val;
+        for (int i = 1; i < all.size(); i++) {
+            val = all.get(i).clone();
+            j = i;
+            while (j > 0 && (val.getName().compareTo(all.get(j).getName()))< 0) {
+                all.set(j,all.get(j-1).clone());
+                j--;
+            }
+            all.set(j,val.clone());
+        }
+    }
+    public void setTAs(ObservableList<TeachingAssistantPrototype> teachingAssistants){
+        this.teachingAssistants = teachingAssistants;
+    }
+    public ObservableList<TimeSlot> getOHClone(){
+        ObservableList<TimeSlot> ohClone = FXCollections.observableArrayList();
+        for (int i = 0; i < officeHours.size(); i++) {
+            TimeSlot temp = officeHours.get(i).clone();
+            ohClone.add(temp);    
+        }
+        return ohClone;
+    } 
 }

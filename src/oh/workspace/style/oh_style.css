@@ -111,41 +111,17 @@
 .oh_button{
     -fx-font-weight:bold;
 }
-.oh_time_column{
-    -fx-background-color:#DDE9E8;
+.oh_table_view .column-header{
+    -fx-background-color: SWATCH_NEUTRAL;
 }
-.oh_time_column:even{
-    -fx-background-color:#4E7C98;
+.oh_office_hours_table_view .column-header {
+    -fx-background-color: SWATCH_NEUTRAL;
 }
-.oh_time_column:odd{
-    -fx-background-color:#4E7C98;
+.oh_time_column {
+    -fx-background-color:   SWATCH_ACCENT;
+    -fx-text-fill:         white;  
+    -fx-font-weight:        bold;
 }
-.oh_time_column{
-    -fx-text-fill:white;
-    -fx-font-weight:bold;
-}
-.oh_day_of_week_column{
-    -fx-font-weight:bold;
-    -fx-background-color:#DDE9E8;
-}
-.oh_column{
-    -fx-background-color:#DDE9E8;
-}
-.oh_column:selected{
-/*    -fx-background-color:#5FA8D3;*/
-}
-.oh_column:even{
-    -fx-background-color:white;
-}
-.oh_column:odd{
-    -fx-background-color:#F9F9F9;
-}
-.oh_day_of_week_column:selected{
-    -fx-text-fill:black;
-}
-.oh_day_of_week_column:even{
-    -fx-background-color:white;
-}
-.oh_day_of_week_column:odd{
-    -fx-background-color:#F9F9F9;
+.oh_day_of_week_column {
+    -fx-font-weight:        bold;
 }
