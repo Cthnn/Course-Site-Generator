@@ -311,7 +311,7 @@ public class OfficeHoursWorkspace extends AppWorkspaceComponent {
                     @Override
                     public TableCell<String, String> call(TableColumn<String, String> param) {
                         return new TableCell<String,String>(){
-                            public void updateItem(final String item, final boolean empty){
+                            public void changeColor(final String item, final boolean empty){
                                 super.updateItem(item,empty);
                                 if (item!= null) {
                                     setText(item);
