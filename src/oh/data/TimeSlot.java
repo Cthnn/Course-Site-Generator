@@ -326,7 +326,7 @@ public class TimeSlot {
             
         }
         dayText.get(DayOfWeek.THURSDAY).setValue(taNames);
-        taNames = "";
+        taNames = " ";
         for (int i = 0; i < tas.get(DayOfWeek.FRIDAY).size(); i++) {
             String taName = tas.get(DayOfWeek.FRIDAY).get(i).getName();
             for (int j = 0; j < gTANames.size(); j++) {

@@ -212,6 +212,7 @@ public class OfficeHoursWorkspace extends AppWorkspaceComponent {
                 TableView taTableView = (TableView) gui.getGUINode(OH_TAS_TABLE_VIEW);
                 TableColumn nameCol = (TableColumn)taTableView.getColumns().get(0);
                 OfficeHoursData data = (OfficeHoursData)app.getDataComponent();
+                goodName = true;
                 for(int i = 0; i < data.getAll().size();i++){
                     if(nameField.getText().equals(data.getAll().get(i).getName())){
                         nameField.setStyle("-fx-text-fill: red");
@@ -222,7 +223,7 @@ public class OfficeHoursWorkspace extends AppWorkspaceComponent {
                         goodName = true;
                     }
                 }
-                if (goodName && goodEmail && !all.isSelected() && !nameField.textProperty().isEmpty().getValue() && !emailField.textProperty().isEmpty().getValue()) {
+                if (goodName && goodEmail && !all.isSelected()) {
                     globalTAButton.setDisable(false);
                 }else{
                     globalTAButton.setDisable(true);
@@ -235,6 +236,13 @@ public class OfficeHoursWorkspace extends AppWorkspaceComponent {
             public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
                 TableView taTableView = (TableView) gui.getGUINode(OH_TAS_TABLE_VIEW);
                 OfficeHoursData data = (OfficeHoursData)app.getDataComponent();
+                if (!OfficeHoursController.validate(emailField.getText())) {
+                    emailField.setStyle("-fx-text-fill: red");
+                    goodEmail = false;
+                }else{
+                    emailField.setStyle("-fx-text-fill: black");
+                    goodEmail = true;
+                }
                 for(int i = 0; i < data.getAll().size(); i++){
                     if(emailField.getText().equals(data.getAll().get(i).getEmail()) || !OfficeHoursController.validate(emailField.getText())){
                         emailField.setStyle("-fx-text-fill: red");
@@ -245,7 +253,7 @@ public class OfficeHoursWorkspace extends AppWorkspaceComponent {
                         goodEmail = true;
                     }
                 }
-                if (goodEmail && goodName && !all.isSelected() && !nameField.textProperty().isEmpty().getValue() && !emailField.textProperty().isEmpty().getValue()) {
+                if (goodEmail && goodName && !all.isSelected()) {
                     globalTAButton.setDisable(false);
                 }else{
                     globalTAButton.setDisable(true);
@@ -293,90 +301,34 @@ public class OfficeHoursWorkspace extends AppWorkspaceComponent {
             officeHoursTableView.getSelectionModel().cellSelectionEnabledProperty().set(true);
             officeHoursTableView.getSelectionModel().selectionModeProperty().set(SelectionMode.MULTIPLE);
             TablePosition tablePosition = (TablePosition) taObservableList.get(0);
+            TeachingAssistantPrototype currentTa = (TeachingAssistantPrototype)taTableView.getSelectionModel().getSelectedItem();
             Object nameVal = ((TableColumn)taTableView.getColumns().get(0)).getCellData(tablePosition.getRow());
             Object emailVal = ((TableColumn)taTableView.getColumns().get(1)).getCellData(tablePosition.getRow());
             Object typeVal = ((TableColumn)taTableView.getColumns().get(3)).getCellData(tablePosition.getRow());
-            officeHoursTableView.getSelectionModel().select(0);
-            int counter = 0;
-//            Callback<TableColumn<TimeSlot, String>, TableCell<TimeSlot, String>> cellFactory = new Callback<TableColumn<TimeSlot, String>, TableCell<TimeSlot, String>>() {
-//                public TableCell call(TableColumn p) {
-//                    TableCell cell = new TableCell<TimeSlot, String>() {
-//                        @Override
-//                        public void updateItem(String item, boolean empty) {
-//                            super.updateItem(item, empty);
-//                            setText(empty ? null : getString());
-//                            if(getString().contains(nameVal.toString() + "/n"))
-//                            setStyle("-fx-background-color: red");
-//                        }
-//
-//                        private String getString() {
-//                            return getItem() == null ? "" : getItem().toString();
-//                        }
-//                    };
-//
-//
-//                    return cell;
-//                }
-//            };
-//            for (int i = 2; i < 7; i++) {
-//                ((TableColumn)officeHoursTableView.getColumns().get(i)).setCellFactory(cellFactory);
-//            }
-//            
-//            while(data.officeHoursIterator().hasNext()){
-//                TimeSlot t = data.officeHoursIterator().next();
-//                for (int i = 0; i < t.getTAs().size(); i++) {
-//                    if (t.getTAs().get(DayOfWeek.MONDAY).get(i).getName().equals(nameVal.toString())) {
-//                        
-//                    }
-//                }
-//            }
-
-
-//            for (int i = 2; i < 7; i++) {
-//                System.out.println(counter);
-//                for (int j = 0; j < 24; j++) {
-//                    if(((TableColumn)ohObsList.get(i)).getCellObservableValue(j).getValue() != (null)){
-//                        TimeSlot t  = (TimeSlot)(officeHoursTableView.getItems().get(counter));
-//                        System.out.println((t.getTAs().get(DayOfWeek.MONDAY)).get(0));
-//                        if (i == 2) {
-//                            for (int k = 0; k < t.getTAs().get(DayOfWeek.MONDAY).size(); k++) {
-//                                if (t.getTAs().get(DayOfWeek.MONDAY).get(k).getName().equals(nameVal)) {
-//                                    officeHoursTableView.
-//                                }
-//                            }
-//                            counter++;
-//                        }else if (i == 3) {
-//                            for (int k = 0; k < t.getTAs().get(DayOfWeek.TUESDAY).size(); k++) {
-//                                if (t.getTAs().get(DayOfWeek.TUESDAY).get(k).getName().equals(nameVal)) {
-//                                    officeHoursTableView.getSelectionModel().select(t);
-//                                }
-//                            }
-//                            counter++;
-//                        }else if (i == 4) {
-//                            for (int k = 0; k < t.getTAs().get(DayOfWeek.THURSDAY).size(); k++) {
-//                                if (t.getTAs().get(DayOfWeek.THURSDAY).get(k).getName().equals(nameVal)) {
-//                                    officeHoursTableView.getSelectionModel().select(t);
-//                                }
-//                            }
-//                            counter++;
-//                        }else if (i == 5) {
-//                            for (int k = 0; k < t.getTAs().get(DayOfWeek.WEDNESDAY).size(); k++) {
-//                                if (t.getTAs().get(DayOfWeek.WEDNESDAY).get(k).getName().equals(nameVal)) {
-//                                    officeHoursTableView.getSelectionModel().select(t);
-//                                }
-//                            }
-//                            counter++;
-//                        }else if (i == 6) {
-//                            for (int k = 0; k < t.getTAs().get(DayOfWeek.FRIDAY).size(); k++) {
-//                                if (t.getTAs().get(DayOfWeek.FRIDAY).get(k).getName().equals(nameVal)) {
-//                                    officeHoursTableView.getSelectionModel().select(t);
-//                                }
-//                            }
-//                            counter++;
-//                        }
-//                    }
-//                }
-//            }
+            for (int i = 2; i < 7; i++) {
+                TableColumn tempCol = (TableColumn)officeHoursTableView.getColumns().get(i);
+                tempCol.setCellFactory(new Callback<TableColumn<String,String>,TableCell<String,String>>(){
+                    @Override
+                    public TableCell<String, String> call(TableColumn<String, String> param) {
+                        return new TableCell<String,String>(){
+                            public void updateItem(final String item, final boolean empty){
+                                super.updateItem(item,empty);
+                                if (item!= null) {
+                                    setText(item);
+                                    if (item.contains(currentTa.getName())) {
+                                        setStyle("-fx-background-color: yellow; -fx-text-fill: black");
+                                    }else{
+                                        setStyle(CLASS_OH_COLUMN);
+                                    }
+                                }else{
+                                    setText(null);
+                                }
+                            }
+                        };
+                    }
+                    
+                });
+            }
             int row = tablePosition.getRow();
             AppNodesBuilder ohBuilder = app.getGUIModule().getNodesBuilder();
             String nameStr = "Name";
