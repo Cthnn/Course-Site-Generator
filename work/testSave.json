@@ -1,0 +1,295 @@
+
+{
+    "banner":[
+        {
+            "subject":"AMS"
+        },
+        {
+            "num":"301"
+        },
+        {
+            "semester":"Fall"
+        },
+        {
+            "year":"2018"
+        },
+        {
+            "title":"Finite Mathematicl Structures"
+        }
+    ],
+    "pages":[
+        {
+            "home":"1"
+        },
+        {
+            "hws":"1"
+        },
+        {
+            "syllabus":"1"
+        },
+        {
+            "schedule":"1"
+        }
+    ],
+    "style":[
+        {
+            "favicon":"../CourseSiteGenerator/images/SBUCSLogo.png"
+        },
+        {
+            "navbar":"../CourseSiteGenerator/images/SBUWhiteShieldLogo.jpg"
+        },
+        {
+            "lfoot":"../CourseSiteGenerator/images/SBUWhiteShieldLogo.jpg"
+        },
+        {
+            "rfoot":"../CourseSiteGenerator/images/SBUDarkRedShieldLogo.png"
+        },
+        {
+            "css":"test_css"
+        }
+    ],
+    "instr":[
+        {
+            "instr_name":"Zhenhua Liu"
+        },
+        {
+            "intr_room":"ESS 100"
+        },
+        {
+            "instr_email":"zhenhua.liu@stonybrook.edu"
+        },
+        {
+            "instr_hp":"TEST"
+        },
+        {
+            "instr_oh":"OH TEST"
+        }
+    ],
+    "syllabus_page":[
+        {
+            "description":"THIS IS A TEST FOR THE DESC BOX"
+        },
+        {
+            "topics":"THIS IS A TEST FOR THE TOPICS BOX"
+        },
+        {
+            "prerequisites":"THIS IS A TEST FOR THE PREQ BOX"
+        },
+        {
+            "outcomes":"THIS IS A TEST FOR THE OCOME BOX"
+        },
+        {
+            "txtbks":"THIS IS A TEST FOR THE TEXTBOOK BOX"
+        },
+        {
+            "Graded Components":"THIS IS A TEST FOR THE GC BOX"
+        },
+        {
+            "Grading Notes":"THIS IS A TEST FOR THE GN BOX"
+        },
+        {
+            "Academic Dishonesty":"THIS IS A TEST FOR THE AD BOX"
+        },
+        {
+            "Special Assistance":"THIS IS A TEST FOR THE SA BOX"
+        }
+    ],
+    "lecture":[
+        {
+            "room":"ESS 100",
+            "section":"01",
+            "days":"MW",
+            "time":"3-4PM"
+        }
+    ],
+    "lab":[
+        {
+            "room":"ESS 100",
+            "section":"01",
+            "days":"MW",
+            "ta1":"3-4PM",
+            "ta2":"3-4PM"
+        }
+    ],
+    "recitation":[
+        {
+            "room":"ESS 100",
+            "section":"01",
+            "days":"MW",
+            "ta1":"3-4PM",
+            "ta2":"3-4PM"
+        }
+    ],
+    "undergrad_tas":[
+        {
+            "name":"ethan",
+            "email":"ethan@toysdiva.com"
+        }
+    ],
+    "grad_tas":[
+        {
+            "name":"graduate ",
+            "email":"gradTA@stonybrook.edu"
+        }
+    ],
+    "startHour":"3",
+    "endHour":"15",
+    "officeHours":[
+        {
+            "time":"3_30am",
+            "day":"MONDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"4_00am",
+            "day":"MONDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"4_30am",
+            "day":"MONDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"5_00am",
+            "day":"MONDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"6_30am",
+            "day":"MONDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"3_30am",
+            "day":"TUESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"4_00am",
+            "day":"TUESDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"5_00am",
+            "day":"TUESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"6_00am",
+            "day":"TUESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"6_30am",
+            "day":"TUESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"7_30am",
+            "day":"TUESDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"7_30am",
+            "day":"TUESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"8_00am",
+            "day":"TUESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"3_00am",
+            "day":"WEDNESDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"5_00am",
+            "day":"WEDNESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"5_30am",
+            "day":"WEDNESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"6_00am",
+            "day":"WEDNESDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"7_30am",
+            "day":"WEDNESDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"7_30am",
+            "day":"WEDNESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"8_00am",
+            "day":"WEDNESDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"9_00am",
+            "day":"WEDNESDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"3_00am",
+            "day":"THURSDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"3_30am",
+            "day":"THURSDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"4_30am",
+            "day":"THURSDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"5_30am",
+            "day":"THURSDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"7_00am",
+            "day":"THURSDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"7_30am",
+            "day":"THURSDAY",
+            "name":"graduate "
+        },
+        {
+            "time":"4_30am",
+            "day":"FRIDAY",
+            "name":"ethan"
+        },
+        {
+            "time":"4_30am",
+            "day":"FRIDAY",
+            "name":"graduate "
+        }
+    ],
+    "schedule":[
+    ],
+    "schedule_table":[
+        {
+            "type":"HW",
+            "date":"11/20/18",
+            "topic":"Benchmark II",
+            "title":"HW 5",
+            "link":"test"
+        }
+    ]
+}

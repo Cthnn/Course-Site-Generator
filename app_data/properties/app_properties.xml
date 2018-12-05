@@ -9,7 +9,7 @@
 <properties>
     <property_list>        
         <!-- DESKTOP JAVA FRAMEWORK CONTROLS SETTINGS -->
-        <property name="APP_TITLE"	    value="Office Hours"></property>
+        <property name="APP_TITLE"	    value="Course Site Generator"></property>
         <property name="APP_BANNER"         value="OfficeHoursWelcomeBanner.png"></property>
 	<property name="APP_LOGO"	    value="OfficeHoursLogo.png"></property>
         <property name="APP_EXPORT_PAGE"    value="index.html"></property>
@@ -40,7 +40,7 @@
         <property name="HAS_HELP_TOOLBAR"       value="true"></property>
         <property name="HAS_HELP"               value="true"></property>
         <property name="HAS_LANGUAGE"           value="true"></property>
-        <property name="HAS_ABOUT"              value="false"></property>
+        <property name="HAS_ABOUT"              value="true"></property>
 
         <!-- PROGRAM ICON FILES - FILE TOOLBAR -->        
         <property name="NEW_BUTTON_ICON"        value="New.png"></property>
@@ -56,6 +56,7 @@
         <!-- PROGRAM ICON FILES - FILE TOOLBAR -->        
         <property name="LANGUAGE_BUTTON_ICON"   value="Language.png"></property>
         <property name="HELP_BUTTON_ICON"       value="Help.png"></property>
+        <property name="ABOUT_BUTTON_ICON"      value="About.png"></property>
         <!-- PROGRAM ICON FILES - CLIPBOARD TOOLBAR -->        
         <property name="CUT_BUTTON_ICON"       value="Cut.png"></property>
         <property name="COPY_BUTTON_ICON"       value="Copy.png"></property>
@@ -66,8 +67,8 @@
 
         <!-- ENGLISH IS THE DEFAULT -->
         <property name="DEFAULT_LANGUAGE"               value="English"></property>
-        <property name="ENGLISH_ABBREVIATION"           value="EN"></property>
 	<property name="SPANISH_ABBREVIATION"           value="SP"></property>
+        <property name="ENGLISH_ABBREVIATION"           value="EN"></property>
 
     </property_list>
     <property_options_list>
