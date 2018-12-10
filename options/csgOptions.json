@@ -29,9 +29,6 @@
         },
         {
             "num":"200"
-        },
-        {
-            "num":"20"
         }
     ],
     "subject_options":[
@@ -45,12 +42,6 @@
             "subject":"JPN"
         },
         {
-            "subject":"Hello"
-        },
-        {
-            "subject":"REE"
-        },
-        {
             "subject":"PHI"
         }
     ],
@@ -60,6 +51,12 @@
         },
         {
             "semester":"Fall"
+        },
+        {
+            "semester":"Winter"
+        },
+        {
+            "semester":"Summer"
         }
     ],
     "css_options":[
@@ -68,6 +65,14 @@
         },
         {
             "css":"test_css"
+        }
+    ],
+    "type_options":[
+        {
+            "type":"HW"
+        },
+        {
+            "type":"PROJECT"
         }
     ]
 }

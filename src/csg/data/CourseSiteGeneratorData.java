@@ -290,27 +290,43 @@ public class CourseSiteGeneratorData implements AppDataComponent {
     }
     public void addLecture(Lecture lect){
         lectures.add(lect);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_LECT_TABLE_VIEW)).refresh();
     }
     public void removeLecture(Lecture lect){
         lectures.remove(lect);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_LECT_TABLE_VIEW)).refresh();
     }
     public void removeLab(Lab_Recitation lab){
         labs.remove(lab);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_LAB_TABLE_VIEW)).refresh();
     }
     public void removeRec(Lab_Recitation rec){
         recitations.remove(rec);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_REC_TABLE_VIEW)).refresh();
     }
     public void removeSchedItem(SchedItem item){
         schedule.remove(item);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
     }
     public void addLab(Lab_Recitation lab){
         labs.add(lab);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_LAB_TABLE_VIEW)).refresh();
     }
     public void addRec(Lab_Recitation rec){
         recitations.add(rec);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_REC_TABLE_VIEW)).refresh();
     }
     public void addSchedItem(SchedItem item){
         schedule.add(item);
+        AppGUIModule gui = app.getGUIModule();
+        ((TableView)gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
     }
     public void addTA(TeachingAssistantPrototype ta) {
         boolean exists = false;

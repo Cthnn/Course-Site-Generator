@@ -36,6 +36,8 @@ import csg.workspace.CourseSiteGeneratorWorkspace;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -44,6 +46,7 @@ import java.util.Date;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
@@ -68,6 +71,7 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
     static final String JSON_SUBJ_OPTION = "subject";
     static final String JSON_NUM_OPTION = "num";
     static final String JSON_CSS_OPTION = "css";
+    static final String JSON_TYPE_OPTION = "type";
     static final String JSON_TITLE = "title";
     static final String JSON_HOME = "home";
     static final String JSON_SYLLABUS = "syllabus";
@@ -162,7 +166,9 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
         JsonArray style = json.getJsonArray(JSON_STYLE);
         
         try{
-        Image image = new Image(new FileInputStream(style.getJsonObject(0).getString(JSON_FAVICON)));
+        String faviconLoc = style.getJsonObject(0).getString(JSON_FAVICON);
+        Image image = new Image(new FileInputStream(faviconLoc));
+        CourseSiteGeneratorWorkspace.faviconFP = faviconLoc;
         ImageView favIV = new ImageView();
         favIV.setImage(image);
         ((HBox)gui.getGUINode(CSG_FAVICON_BOX)).getChildren().remove(((HBox)gui.getGUINode(CSG_FAVICON_BOX)).getChildren().size()-1);
@@ -171,26 +177,32 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
             System.out.println("Error");
         }
         try{
-        Image image = new Image(new FileInputStream(style.getJsonObject(1).getString(JSON_NAVBAR)));
+        String nav = style.getJsonObject(1).getString(JSON_NAVBAR);
+        Image image = new Image(new FileInputStream(nav));
         ImageView navIV = new ImageView();
         navIV.setImage(image);
+        CourseSiteGeneratorWorkspace.navbarFP = nav;
         ((HBox)gui.getGUINode(CSG_NAVBAR_BOX)).getChildren().remove(((HBox)gui.getGUINode(CSG_NAVBAR_BOX)).getChildren().size()-1);
         ((HBox)gui.getGUINode(CSG_NAVBAR_BOX)).getChildren().add(navIV);
         }catch(FileNotFoundException e){
             System.out.println("Error");
         }
         try{
-        Image image = new Image(new FileInputStream(style.getJsonObject(2).getString(JSON_LFOOT)));
+        String lfoot = style.getJsonObject(2).getString(JSON_LFOOT);
+        Image image = new Image(new FileInputStream(lfoot));
         ImageView lfootIV = new ImageView();
         lfootIV.setImage(image);
+        CourseSiteGeneratorWorkspace.lfootFP = lfoot;
         ((HBox)gui.getGUINode(CSG_LFOOT_BOX)).getChildren().remove(((HBox)gui.getGUINode(CSG_LFOOT_BOX)).getChildren().size()-1);
         ((HBox)gui.getGUINode(CSG_LFOOT_BOX)).getChildren().add(lfootIV);
         }catch(FileNotFoundException e){
             System.out.println("Error");
         }
         try{
-        Image image = new Image(new FileInputStream(style.getJsonObject(3).getString(JSON_RFOOT)));
+        String rfoot = style.getJsonObject(3).getString(JSON_RFOOT);
+        Image image = new Image(new FileInputStream(rfoot));
         ImageView rfootIV = new ImageView();
+        CourseSiteGeneratorWorkspace.rfootFP = rfoot;
         rfootIV.setImage(image);
         ((HBox)gui.getGUINode(CSG_RFOOT_BOX)).getChildren().remove(((HBox)gui.getGUINode(CSG_RFOOT_BOX)).getChildren().size()-1);
         ((HBox)gui.getGUINode(CSG_RFOOT_BOX)).getChildren().add(rfootIV);
@@ -409,6 +421,25 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
             SchedItem item = new SchedItem(type,date,title,topic,link);
             csgData.addSchedItem(item);
         }
+        JsonArray sched = json.getJsonArray(JSON_SCHEDULE);
+        String startMon = sched.getJsonObject(0).getString(JSON_START_MON);
+        String startFri =  sched.getJsonObject(1).getString(JSON_START_FRI);
+        HBox monBox = ((HBox)gui.getGUINode(CSG_STMON_PANE));
+        HBox friBox = ((HBox)gui.getGUINode(CSG_STFRI_PANE));
+        DatePicker friPicker = (DatePicker)(friBox.getChildren().get(friBox.getChildren().size()-1));
+        DatePicker monPicker = (DatePicker)(monBox.getChildren().get(monBox.getChildren().size()-1));
+        String year = startMon.substring(0,4);
+        String month = startMon.substring(5,7);
+        String day = startMon.substring(8,10);
+        Date monDate = new Date(Integer.parseInt(year),Integer.parseInt(month)-1,Integer.parseInt(day));
+        year = startFri.substring(0,4);
+        month = startFri.substring(5,7);
+        day = startFri.substring(8,10);
+        Date friDate = new Date(Integer.parseInt(year),Integer.parseInt(month)-1,Integer.parseInt(day));
+        LocalDate locMonDate = LocalDate.of(monDate.getYear(),monDate.getMonth()+1,monDate.getDate());
+        LocalDate locFriDate = LocalDate.of(friDate.getYear(),friDate.getMonth()+1,friDate.getDate());
+        friPicker.setValue(locFriDate);
+        monPicker.setValue(locMonDate);
     }
       
     // HELPER METHOD FOR LOADING DATA FROM A JSON FORMAT
@@ -785,13 +816,14 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
         JsonArray gradTAsArray = gradTAArrayBuilder.build();
         //Schedule Pane
         JsonArrayBuilder schedule = Json.createArrayBuilder();
-        // HBox monBox = ((HBox)gui.getGUINode(CSG_STMON_PANE));
-        //DatePicker monPicker = (DatePicker)(monBox.getChildren().get(monBox.getChildren().size()-1));
-        //LocalDate localDate = monPicker.getValue();
-        //JsonObject startMon = Json.createObjectBuilder().add(JSON_START_MON,monPicker.getValue().toString()).build();
-        //JsonObject startFri =  Json.createObjectBuilder().add(JSON_START_FRI,monPicker.getValue().toString()).build();
-        //schedule.add(startMon);
-        //schedule.add(startFri);
+        HBox monBox = ((HBox)gui.getGUINode(CSG_STMON_PANE));
+        HBox friBox = ((HBox)gui.getGUINode(CSG_STFRI_PANE));
+        DatePicker friPicker = (DatePicker)(friBox.getChildren().get(friBox.getChildren().size()-1));
+        DatePicker monPicker = (DatePicker)(monBox.getChildren().get(monBox.getChildren().size()-1));
+        JsonObject startMon = Json.createObjectBuilder().add(JSON_START_MON,monPicker.getValue().toString()).build();
+        JsonObject startFri =  Json.createObjectBuilder().add(JSON_START_FRI,friPicker.getValue().toString()).build();
+        schedule.add(startMon);
+        schedule.add(startFri);
         JsonArrayBuilder scheduleItems = Json.createArrayBuilder();
         Iterator<SchedItem> schedIterator = csgData.schedIterator();
         while (schedIterator.hasNext()) {
@@ -853,7 +885,9 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
 
     @Override
     public void exportData(AppDataComponent data, String filePath) throws IOException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        AppGUIModule gui = app.getGUIModule();
+        Label dirLabel = (Label)gui.getGUINode(CSG_DIR_LABEL);
+        String exportDir = dirLabel.getText();
     }
     public void loadOptions(PropertiesManager props){
         try{
@@ -863,6 +897,7 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
             JsonArray subjArray = json.getJsonArray(JSON_SUBJ_OPTION+"_options");
             JsonArray semArray = json.getJsonArray(JSON_SEM_OPTION+"_options");
             JsonArray cssArray = json.getJsonArray(JSON_CSS_OPTION+"_options");
+            JsonArray typeArray = json.getJsonArray(JSON_TYPE_OPTION+"_options");
             for (int i = 0; i < yearArray.size(); i++) {
                 boolean exists = false;
                 JsonObject jsonYear = yearArray.getJsonObject(i);
@@ -924,6 +959,18 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
                     props.getPropertyOptionsList("CSS_OPTIONS").add(jsonCSS.getString(JSON_CSS_OPTION));
                 }
             }
+            for (int i = 0; i < typeArray.size(); i++) {
+                boolean exists = false;
+                JsonObject jsonType = typeArray.getJsonObject(i);
+                for (int j = 0; j < props.getPropertyOptionsList("TYPE_OPTIONS").size(); j++) {
+                    if (props.getPropertyOptionsList("TYPE_OPTIONS").get(j).equals(jsonType.getString(JSON_TYPE_OPTION))) {
+                        exists = true;
+                    }
+                }
+                if (!exists) {
+                    props.getPropertyOptionsList("TYPE_OPTIONS").add(jsonType.getString(JSON_TYPE_OPTION));
+                }
+            }
         }catch(IOException e){
             System.out.println("Error");
         }
@@ -934,6 +981,7 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
         JsonArrayBuilder subjOptions = Json.createArrayBuilder();
         JsonArrayBuilder numOptions = Json.createArrayBuilder();
         JsonArrayBuilder cssOptions = Json.createArrayBuilder();
+        JsonArrayBuilder typeOptions = Json.createArrayBuilder();
         PropertiesManager props = PropertiesManager.getPropertiesManager();
         for (int i = 0; i < props.getPropertyOptionsList("YEAR_OPTIONS").size(); i++) {
             JsonObject year = Json.createObjectBuilder()
@@ -960,12 +1008,18 @@ public class CourseSiteGeneratorFiles implements AppFileComponent {
                     .add(JSON_CSS_OPTION,props.getPropertyOptionsList("CSS_OPTIONS").get(i)).build();
             cssOptions.add(css);
         }
+        for (int i = 0; i < props.getPropertyOptionsList("TYPE_OPTIONS").size(); i++) {
+            JsonObject type = Json.createObjectBuilder()
+                    .add(JSON_TYPE_OPTION,props.getPropertyOptionsList("TYPE_OPTIONS").get(i)).build();
+            typeOptions.add(type);
+        }
         JsonObject optionsJSO = Json.createObjectBuilder()
 		.add(JSON_YEAR_OPTION+"_options",yearOptions)
                 .add(JSON_NUM_OPTION+"_options",numOptions)
                 .add(JSON_SUBJ_OPTION+"_options",subjOptions)
                 .add(JSON_SEM_OPTION+"_options",semOptions)
                 .add(JSON_CSS_OPTION+"_options",cssOptions)
+                .add(JSON_TYPE_OPTION+"_options",typeOptions)
 		.build();
             Map<String, Object> properties = new HashMap<>(1);
             properties.put(JsonGenerator.PRETTY_PRINTING, true);

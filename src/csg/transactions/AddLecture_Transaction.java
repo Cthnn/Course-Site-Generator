@@ -31,7 +31,7 @@ public class AddLecture_Transaction implements jTPS_Transaction {
 
     @Override
     public void undoTransaction() {
-        if (isAdd) {
+        if (!isAdd) {
             data.addLecture(lect);     
         }else{
             data.removeLecture(lect);

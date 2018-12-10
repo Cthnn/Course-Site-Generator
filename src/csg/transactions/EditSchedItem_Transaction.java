@@ -1,9 +1,13 @@
 package csg.transactions;
 
+import csg.CourseSiteGeneratorApp;
+import static csg.CourseSiteGeneratorPropertyType.CSG_SCHED_TABLE_VIEW;
 import jtps.jTPS_Transaction;
 import csg.data.CourseSiteGeneratorData;
 import csg.data.SchedItem;
+import djf.modules.AppGUIModule;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
 
 /**
  *
@@ -14,15 +18,18 @@ public class EditSchedItem_Transaction implements jTPS_Transaction {
     SchedItem currentItem;
     SchedItem newItem;
     SchedItem oldItem;
-    public EditSchedItem_Transaction(CourseSiteGeneratorData initData, SchedItem initNewItem, SchedItem initOldItem) {
+    CourseSiteGeneratorApp app;
+    public EditSchedItem_Transaction(CourseSiteGeneratorData initData, SchedItem initNewItem, SchedItem initOldItem, CourseSiteGeneratorApp initApp) {
         data = initData;
         currentItem = initOldItem;
         newItem = initNewItem;
         oldItem = initOldItem.clone();
+        app = initApp;
     }
 
     @Override
     public void doTransaction() {
+        AppGUIModule gui = app.getGUIModule();
         ObservableList<SchedItem> schedules = data.getSchedules();
         for (SchedItem s: schedules) {
             if (s == currentItem) {
@@ -31,13 +38,14 @@ public class EditSchedItem_Transaction implements jTPS_Transaction {
                 s.setLink(newItem.getLink());
                 s.setType(newItem.getType());
                 s.setTitle(newItem.getTitle());
-                System.out.println(s.getDate());
             }
-        }       
+        }
+        ((TableView)gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
     }
 
     @Override
     public void undoTransaction() {
+        AppGUIModule gui = app.getGUIModule();
         ObservableList<SchedItem> schedules = data.getSchedules();
         for (SchedItem s: schedules) {
             if (s == currentItem) {
@@ -48,5 +56,6 @@ public class EditSchedItem_Transaction implements jTPS_Transaction {
                 s.setTitle(oldItem.getTitle());
             }
         }
+        ((TableView)gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
     }
 }

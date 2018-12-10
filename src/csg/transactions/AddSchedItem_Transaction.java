@@ -29,7 +29,7 @@ public class AddSchedItem_Transaction implements jTPS_Transaction {
 
     @Override
     public void undoTransaction() {
-        if (isAdd) {
+        if (!isAdd) {
             data.addSchedItem(item);
         }else{
             data.removeSchedItem(item);

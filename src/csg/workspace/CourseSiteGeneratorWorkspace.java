@@ -4,6 +4,7 @@ import djf.components.AppWorkspaceComponent;
 import djf.modules.AppFoolproofModule;
 import djf.modules.AppGUIModule;
 import static djf.modules.AppGUIModule.ENABLED;
+import static djf.AppPropertyType.EXPORT_BUTTON;
 import djf.ui.AppNodesBuilder;
 import djf.ui.foolproof.ClipboardFoolproofDesign;
 import java.awt.Toolkit;
@@ -70,31 +71,46 @@ import csg.transactions.AddLab_Rec_Transaction;
 import csg.transactions.AddLecture_Transaction;
 import csg.transactions.AddSchedItem_Transaction;
 import csg.transactions.AddTA_OHTransaction;
+import csg.transactions.CBEdit_Transaction;
+import csg.transactions.CheckBox_Transaction;
+import csg.transactions.ClearItem_Transaction;
+import csg.transactions.DatePicker_Transaction;
+import csg.transactions.EditLab_Recitation_Transaction;
+import csg.transactions.EditLecture_Transaction;
 import csg.transactions.EditSchedItem_Transaction;
 import csg.transactions.EditTA_Transaction;
+import csg.transactions.Image_Transaction;
 import csg.transactions.RemoveTA_Transaction;
+import csg.transactions.TextEdit_Transaction;
 import csg.workspace.controllers.CourseSiteGeneratorController;
 import csg.workspace.foolproof.CourseSiteGeneratorFoolproofDesign;
 import static csg.workspace.style.OHStyle.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
+import javafx.util.StringConverter;
 
 /**
  *
@@ -102,16 +118,52 @@ import javafx.stage.FileChooser;
  */
 public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
     private TeachingAssistantPrototype copiedTA;
-    private Lecture currentLect;
-    private Lab_Recitation currentLab;
-    private Lab_Recitation currentRec;
     private boolean isUpdate = false;
-    Boolean goodName = false;
-    Boolean goodEmail = false;
-    Boolean goodNameTF = false;
-    Boolean goodEmailTF = false;
-    Button globalTAButton;
-    String currentType = "all";
+    private String oldMon = "";
+    private String oldFri = "";
+    private String oldDate = "";
+    private String titleText = "";
+    private String instrNameText = "";
+    private String instrRoomText = "";
+    private String instrEmailText = "";
+    private String instrHPText = "";
+    private String instrOHText = "";
+    private String descText = "";
+    private String topicsText = "";
+    private String preqText = "";
+    private String ocText = "";
+    private String tbText = "";
+    private String gcText = "";
+    private String gnText = "";
+    private String adText = "";
+    private String saText = "";
+    private String schedTitle = "";
+    private String schedTopic = "";
+    private String schedLink = "";
+    private Boolean goodName = false;
+    private Boolean goodEmail = false;
+    private Boolean goodNameTF = false;
+    private Boolean goodEmailTF = false;
+    private Button globalTAButton;
+    private ArrayList<String> semTransac = new ArrayList();
+    private ArrayList<String> yearTransac = new ArrayList();
+    private ArrayList<String> numTransac = new ArrayList();
+    private ArrayList<String> subjTransac = new ArrayList();
+    private ArrayList<String> typeTransac = new ArrayList();
+    private ArrayList<String> cssTransac = new ArrayList();
+    private ArrayList<String> homeTransac = new ArrayList();
+    private ArrayList<String> syllTransac = new ArrayList();
+    private ArrayList<String> hwTransac = new ArrayList();
+    private ArrayList<String> monTransac = new ArrayList();
+    private ArrayList<String> friTransac = new ArrayList();
+    private ArrayList<String> dateTransac = new ArrayList();
+    private String semText;
+    private String numText;
+    private String yearText;
+    private String subjText;
+    private String typeText;
+    private String cssText;
+    private String currentType = "all";
     public static String faviconFP = "";
     public static String lfootFP = "";
     public static String rfootFP = "";
@@ -142,6 +194,7 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         props.addPropertyOptionsList("SEMESTER_OPTIONS", new ArrayList<String>());
         props.addPropertyOptionsList("NUMBER_OPTIONS", new ArrayList<String>());
         props.addPropertyOptionsList("CSS_OPTIONS", new ArrayList<String>());
+        props.addPropertyOptionsList("TYPE_OPTIONS", new ArrayList<String>());
         // THIS WILL BUILD ALL OF OUR JavaFX COMPONENTS FOR US
         AppNodesBuilder csgBuilder = app.getGUIModule().getNodesBuilder();
         CourseSiteGeneratorFiles file = new CourseSiteGeneratorFiles((CourseSiteGeneratorApp) app);
@@ -446,12 +499,6 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         mtPane.setStyle("-fx-background-color: #a7f464");
         mtPane.setPadding((new Insets(10, 15, 10, 15)));
         mtPane.setSpacing(15);
-        Callback<TableColumn, TableCell> cellFactory =
-             new Callback<TableColumn, TableCell>() {
-                 public TableCell call(TableColumn p) {
-                    return new TextFieldTableCell();
-                 }
-             };
         VBox lecturesBox = csgBuilder.buildVBox(CSG_LECT_BOX, mtPane, CLASS_CSG_BOX, ENABLED);
         lecturesBox.setPadding((new Insets(10, 15, 10, 15)));
         lecturesBox.setSpacing(15);
@@ -473,23 +520,23 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         TableColumn secColumn = csgBuilder.buildTableColumn(CSG_SEC_LECT_TC, lectTable, CLASS_CSG_COLUMN);
         secColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Section"));
         secColumn.editableProperty().set(true);
-        secColumn.setCellFactory(cellFactory);
+        secColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         secColumn.prefWidthProperty().bind(lectTable.widthProperty().multiply(0.5/3.0));
         TableColumn dayColumn = csgBuilder.buildTableColumn(CSG_DAY_LECT_TC, lectTable, CLASS_CSG_COLUMN);
         dayColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Days"));
         dayColumn.editableProperty().set(true);
-        dayColumn.setCellFactory(cellFactory);
+        dayColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         dayColumn.prefWidthProperty().bind(lectTable.widthProperty().multiply(0.5/3.0));
         TableColumn timeColumn = csgBuilder.buildTableColumn(CSG_TIME_LECT_TC, lectTable, CLASS_CSG_COLUMN);
         timeColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Time"));
         timeColumn.editableProperty().set(true);
-        timeColumn.setCellFactory(cellFactory);
+        timeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         timeColumn.prefWidthProperty().bind(lectTable.widthProperty().multiply(1/3.0));
         TableColumn roomColumn = csgBuilder.buildTableColumn(CSG_ROOM_LECT_TC, lectTable, CLASS_CSG_COLUMN);
         roomColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Room"));
         roomColumn.prefWidthProperty().bind(lectTable.widthProperty().multiply(1/3.0));
         roomColumn.editableProperty().set(true);
-        roomColumn.setCellFactory(cellFactory);
+        roomColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         VBox recitationsBox = csgBuilder.buildVBox(CSG_REC_BOX, mtPane, CLASS_CSG_BOX, ENABLED);
         recitationsBox.setPadding((new Insets(10, 15, 10, 15)));
         recitationsBox.setSpacing(15);
@@ -512,26 +559,26 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         secRecColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Section"));
         secRecColumn.prefWidthProperty().bind(recTable.widthProperty().multiply(0.5/4.0));
         secRecColumn.editableProperty().set(true);
-        secRecColumn.setCellFactory(cellFactory);
+        secRecColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         TableColumn dayTimeColumn = csgBuilder.buildTableColumn(CSG_DAY_REC_TC, recTable, CLASS_CSG_COLUMN);
         dayTimeColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Days"));
         dayTimeColumn.editableProperty().set(true);
-        dayTimeColumn.setCellFactory(cellFactory);
+        dayTimeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         dayTimeColumn.prefWidthProperty().bind(recTable.widthProperty().multiply(1/4.0));
         TableColumn roomRecColumn = csgBuilder.buildTableColumn(CSG_ROOM_REC_TC, recTable, CLASS_CSG_COLUMN);
         roomRecColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Room"));
         roomRecColumn.editableProperty().set(true);
-        roomRecColumn.setCellFactory(cellFactory);
+        roomRecColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         roomRecColumn.prefWidthProperty().bind(recTable.widthProperty().multiply(0.5/4.0));
         TableColumn ta1RecColumn = csgBuilder.buildTableColumn(CSG_TA1_REC_TC, recTable, CLASS_CSG_COLUMN);
         ta1RecColumn.setCellValueFactory(new PropertyValueFactory<String, String>("TA1"));
         ta1RecColumn.editableProperty().set(true);
-        ta1RecColumn.setCellFactory(cellFactory);
+        ta1RecColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         ta1RecColumn.prefWidthProperty().bind(recTable.widthProperty().multiply(1/4.0));
         TableColumn ta2RecColumn = csgBuilder.buildTableColumn(CSG_TA2_REC_TC, recTable, CLASS_CSG_COLUMN);
         ta2RecColumn.setCellValueFactory(new PropertyValueFactory<String, String>("TA2"));
         ta2RecColumn.editableProperty().set(true);
-        ta2RecColumn.setCellFactory(cellFactory);
+        ta2RecColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         ta2RecColumn.prefWidthProperty().bind(recTable.widthProperty().multiply(1/4.0));
         
         VBox labsBox = csgBuilder.buildVBox(CSG_LAB_BOX, mtPane, CLASS_CSG_BOX, ENABLED);
@@ -555,27 +602,27 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         TableColumn secLabColumn = csgBuilder.buildTableColumn(CSG_SEC_LAB_TC, labsTable, CLASS_CSG_COLUMN);
         secLabColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Section"));
         secLabColumn.editableProperty().set(true);
-        secLabColumn.setCellFactory(cellFactory);
+        secLabColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         secLabColumn.prefWidthProperty().bind(labsTable.widthProperty().multiply(0.5/4.0));
         TableColumn dayLabColumn = csgBuilder.buildTableColumn(CSG_DAY_LAB_TC, labsTable, CLASS_CSG_COLUMN);
         dayLabColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Days"));
         dayLabColumn.editableProperty().set(true);
-        dayLabColumn.setCellFactory(cellFactory);
+        dayLabColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         dayLabColumn.prefWidthProperty().bind(labsTable.widthProperty().multiply(1/4.0));
         TableColumn roomLabColumn = csgBuilder.buildTableColumn(CSG_ROOM_LAB_TC, labsTable, CLASS_CSG_COLUMN);
         roomLabColumn.setCellValueFactory(new PropertyValueFactory<String, String>("Room"));
         roomLabColumn.editableProperty().set(true);
-        roomLabColumn.setCellFactory(cellFactory);
+        roomLabColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         roomLabColumn.prefWidthProperty().bind(labsTable.widthProperty().multiply(0.5/4.0));
         TableColumn ta1LabColumn = csgBuilder.buildTableColumn(CSG_TA1_LAB_TC, labsTable, CLASS_CSG_COLUMN);
         ta1LabColumn.setCellValueFactory(new PropertyValueFactory<String, String>("TA1"));
         ta1LabColumn.editableProperty().set(true);
-        ta1LabColumn.setCellFactory(cellFactory);
+        ta1LabColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         ta1LabColumn.prefWidthProperty().bind(labsTable.widthProperty().multiply(1/4.0));
         TableColumn ta2LabColumn = csgBuilder.buildTableColumn(CSG_TA2_LAB_TC, labsTable, CLASS_CSG_COLUMN);
         ta2LabColumn.setCellValueFactory(new PropertyValueFactory<String, String>("TA2"));
         ta2LabColumn.editableProperty().set(true);
-        ta2LabColumn.setCellFactory(cellFactory);
+        ta2LabColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         ta2LabColumn.prefWidthProperty().bind(labsTable.widthProperty().multiply(1/4.0));
         scrollMT.setContent(mtPane);
         mtTab.contentProperty().setValue(scrollMT);
@@ -689,10 +736,12 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         monBox.setSpacing(15);
         csgBuilder.buildLabel(CSG_STMON_LABEL,monBox,CLASS_CSG_LABEL,ENABLED);
         DatePicker d = new DatePicker();
+        d.setValue(LocalDate.of(2018, 12, 10));
         monBox.getChildren().add(d);
         HBox friBox = csgBuilder.buildHBox(CSG_STFRI_PANE, dateBox, CLASS_CSG_BOX, ENABLED);
         csgBuilder.buildLabel(CSG_STFRI_LABEL,friBox,CLASS_CSG_LABEL,ENABLED);
         DatePicker e = new DatePicker();
+        e.setValue(LocalDate.of(2018, 12, 14));
         friBox.getChildren().add(e);
         scrollSchd.setContent(schdPane);
         VBox schdBox = csgBuilder.buildVBox(CSG_SCHED_PANE, schdPane, CLASS_CSG_BOX, ENABLED);
@@ -725,11 +774,12 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         HBox typeBox = csgBuilder.buildHBox(CSG_ADD_TYPE_PANE, addEdit, CLASS_CSG_BOX, ENABLED);
         typeBox.setSpacing(30);
         csgBuilder.buildLabel(CSG_ADD_TYPE_LABEL,typeBox,CLASS_CSG_LABEL, ENABLED);
-        csgBuilder.buildComboBox(CSG_TYPE_CB,"TYPE_OPTIONS", "Options", typeBox, CLASS_CSG_BUTTON, ENABLED);
+        ComboBox typeComboBox = csgBuilder.buildComboBox(CSG_TYPE_CB,"TYPE_OPTIONS", "HW", typeBox, CLASS_CSG_BUTTON, ENABLED);
+        typeComboBox.setValue("HW");
         HBox addDateBox = csgBuilder.buildHBox(CSG_ADD_DATE_PANE, addEdit, CLASS_CSG_BOX, ENABLED);
         csgBuilder.buildLabel(CSG_ADD_DATE_LABEL, addDateBox,CLASS_CSG_LABEL,ENABLED);
         addDateBox.setSpacing(30);
-        DatePicker addDatePicker = new DatePicker();
+        DatePicker addDatePicker = new DatePicker(LocalDate.now());
         addDateBox.getChildren().add(addDatePicker);
         HBox addTitleBox = csgBuilder.buildHBox(CSG_ADD_TITLE_PANE, addEdit, CLASS_CSG_BOX, ENABLED);
         addTitleBox.setSpacing(30);
@@ -775,14 +825,10 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Image File");
             File image = fileChooser.showOpenDialog(filePicker);
-            faviconFP = image.getPath();
+            HBox faviconBox = ((HBox) gui.getGUINode(CSG_FAVICON_BOX));
             if (image !=null){
-                HBox faviconBox = ((HBox) gui.getGUINode(CSG_FAVICON_BOX));
-                faviconBox.getChildren().remove(1);
-                Image newImage = new Image(image.toURI().toString());
-                ImageView iv = new ImageView();
-                iv.setImage(newImage);
-                faviconBox.getChildren().add(iv);
+            Image_Transaction newImage = new Image_Transaction(faviconBox,faviconFP,image.getPath(),"fav");
+            app.processTransaction(newImage);
             }
         });
         ((Button) gui.getGUINode(CSG_LFOOT_BUTTON)).setOnAction(e -> {
@@ -790,14 +836,10 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Image File");
             File image = fileChooser.showOpenDialog(filePicker);
-            lfootFP = image.getPath();
+            HBox lFootBox = ((HBox) gui.getGUINode(CSG_LFOOT_BOX));
             if (image !=null){
-                HBox lFootBox = ((HBox) gui.getGUINode(CSG_LFOOT_BOX));
-                lFootBox.getChildren().remove(1);
-                Image newImage = new Image(image.toURI().toString());
-                ImageView iv = new ImageView();
-                iv.setImage(newImage);
-                lFootBox.getChildren().add(iv);
+                Image_Transaction newImage = new Image_Transaction(lFootBox,lfootFP,image.getPath(),"lfoot");
+                app.processTransaction(newImage);
             }
         });
         ((Button) gui.getGUINode(CSG_RFOOT_BUTTON)).setOnAction(e -> {
@@ -805,14 +847,10 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Image File");
             File image = fileChooser.showOpenDialog(filePicker);
-            rfootFP = image.getPath();
+            HBox rFootBox = ((HBox) gui.getGUINode(CSG_RFOOT_BOX));
             if (image !=null){
-                HBox rFootBox = ((HBox) gui.getGUINode(CSG_RFOOT_BOX));
-                rFootBox.getChildren().remove(1);
-                Image newImage = new Image(image.toURI().toString());
-                ImageView iv = new ImageView();
-                iv.setImage(newImage);
-                rFootBox.getChildren().add(iv);
+                Image_Transaction newImage = new Image_Transaction(rFootBox,rfootFP,image.getPath(),"rfoot");
+                app.processTransaction(newImage);
             }
         });
         ((Button) gui.getGUINode(CSG_NAVBAR_BUTTON)).setOnAction(e -> {
@@ -820,14 +858,10 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Open Image File");
             File image = fileChooser.showOpenDialog(filePicker);
-            navbarFP = image.getPath();
+            HBox navbarBox = ((HBox) gui.getGUINode(CSG_NAVBAR_BOX));
             if (image !=null){
-                HBox navbarBox = ((HBox) gui.getGUINode(CSG_NAVBAR_BOX));
-                navbarBox.getChildren().remove(1);
-                Image newImage = new Image(image.toURI().toString());
-                ImageView iv = new ImageView();
-                iv.setImage(newImage);
-                navbarBox.getChildren().add(iv);
+                Image_Transaction newImage = new Image_Transaction(navbarBox,navbarFP,image.getPath(),"nav");
+                app.processTransaction(newImage);
             }
         });
         ((Button) gui.getGUINode(CSG_ADD_TA_BUTTON)).setOnAction(e -> {
@@ -1145,142 +1179,192 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         ComboBox numCB = ((ComboBox) gui.getGUINode(CSG_NUMBER_CB));
         ComboBox yearCB = ((ComboBox) gui.getGUINode(CSG_YEAR_CB));
         ComboBox subjCB = ((ComboBox) gui.getGUINode(CSG_SUBJECT_CB));
-        semCB.setOnAction(e -> {
-            ArrayList<String> semList = props.getPropertyOptionsList("SEMESTER_OPTIONS");
-            boolean exists = false;
-            for (int i = 0; i < semList.size(); i++) {
-                if(semCB.getSelectionModel().getSelectedItem().toString().equals (semList.get(i))){
-                    exists = true;
-                    break;
-                }
-            }
-            if(!exists){
-                
-                props.getPropertyOptionsList("SEMESTER_OPTIONS").add(semCB.getSelectionModel().getSelectedItem().toString());
-                for (int i = 0; i < props.getPropertyOptionsList("SEMESTER_OPTIONS").size(); i++) {
-                    boolean inList = false;
-                    for (int j = 0; j < semCB.getItems().size(); j++) {
-                        if (semCB.getItems().get(j).equals(props.getPropertyOptionsList("SEMESTER_OPTIONS").get(i))) {
-                            inList = true;
+        ComboBox typeCB = ((ComboBox)gui.getGUINode(CSG_TYPE_CB));
+        ComboBox cssCB =((ComboBox)gui.getGUINode(CSG_CSS_CB));
+        semText = (String)semCB.getValue();
+        yearText = (String)yearCB.getValue();
+        numText = (String)numCB.getValue();
+        subjText = (String)subjCB.getValue();
+        typeText = (String)typeCB.getValue();
+        cssText = (String)cssCB.getValue();
+        typeCB.setOnAction(e->{
+            String newText = (String)typeCB.getValue();
+            if (!newText.equals(typeTransac)) {
+                if(typeTransac.isEmpty()){
+                    typeTransac.add("Edit");
+                    ArrayList<String> typeList = props.getPropertyOptionsList("TYPE_OPTIONS");
+                    CBEdit_Transaction newEdit = new CBEdit_Transaction(typeCB,typeText,newText,typeList,typeTransac,4,(CourseSiteGeneratorApp) app);
+                    app.processTransaction(newEdit);            
+                }else{
+                    if((!(typeTransac.get(typeTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(typeTransac.get(typeTransac.size()-1).equalsIgnoreCase("redo")))&& (!(typeTransac.get(typeTransac.size()-1).equalsIgnoreCase("clear")))){
+                        typeTransac.add("Edit");
+                        ArrayList<String> typeList = props.getPropertyOptionsList("TYPE_OPTIONS");
+                        CBEdit_Transaction newEdit = new CBEdit_Transaction(typeCB,typeText,newText,typeList,typeTransac,4,(CourseSiteGeneratorApp) app);
+                        app.processTransaction(newEdit);
+                    }else{
+                        if(typeTransac.get(typeTransac.size()-1).equalsIgnoreCase("Undo") || typeTransac.get(typeTransac.size()-1).equalsIgnoreCase("redo")){
+                            for (int i = typeTransac.size()-1; i >= 0 ; i--) {
+                                if (typeTransac.get(i).equalsIgnoreCase("Undo")) {
+                                    typeTransac.remove(i);
+                                }else if(typeTransac.get(i).equalsIgnoreCase("redo")){
+                                    typeTransac.remove(i);
+                                }
+                            }
+                        }else if(typeTransac.get(typeTransac.size()-1).equalsIgnoreCase("clear")){
+                            for (int i = typeTransac.size()-1; i >= 0 ; i--) {
+                                if (typeTransac.get(i).equalsIgnoreCase("clear")) {
+                                    typeTransac.remove(typeTransac.size()-1);
+                                }
+                            }  
                         }
                     }
-                    if(!inList){
-                        semCB.getItems().add(props.getPropertyOptionsList("SEMESTER_OPTIONS").get(i));
-                        
+                }
+            }
+        });
+        cssCB.setOnAction(e->{
+            String newText = (String)cssCB.getValue();        
+//            if (!newText.equals(cssTransac)) {
+//                if(cssTransac.isEmpty()){
+//                    cssTransac.add("Edit");
+//                    System.out.println("empty");
+//                    ArrayList<String> cssList = props.getPropertyOptionsList("CSS_OPTIONS");
+//                    CBEdit_Transaction newEdit = new CBEdit_Transaction(cssCB,cssText,newText,cssList,cssTransac,5,(CourseSiteGeneratorApp) app);
+//                    app.processTransaction(newEdit);            
+//                }else{
+//                    if((!(cssTransac.get(cssTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(cssTransac.get(cssTransac.size()-1).equalsIgnoreCase("redo")))){
+//                        cssTransac.add("Edit");
+//                        System.out.println("not");
+//                        ArrayList<String> cssList = props.getPropertyOptionsList("CSS_OPTIONS");
+//                        CBEdit_Transaction newEdit = new CBEdit_Transaction(cssCB,cssText,newText,cssList,cssTransac,5,(CourseSiteGeneratorApp) app);
+//                        app.processTransaction(newEdit);
+//                    }else{
+//                        System.out.println("redo");
+//                        if (cssTransac.get(cssTransac.size()-1).equalsIgnoreCase("Undo") && cssTransac.get(cssTransac.size()-1).equalsIgnoreCase("redo")) {
+//                            for (int i = cssTransac.size()-1; i >= 0 ; i--) {
+//                                if (cssTransac.get(i).equalsIgnoreCase("Undo")) {
+//                                    cssTransac.remove(i);
+//                                }else if(cssTransac.get(i).equalsIgnoreCase("redo")){
+//                                    cssTransac.remove(i);
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+            System.out.println(cssTransac);
+        });
+        semCB.setOnAction(e->{
+            String newText = (String)semCB.getValue();
+            if (!newText.equals(semText)) {
+                if(semTransac.isEmpty()){
+                    semTransac.add("Edit");
+                    ArrayList<String> semList = props.getPropertyOptionsList("SEMESTER_OPTIONS");
+                    CBEdit_Transaction newEdit = new CBEdit_Transaction(semCB,semText,newText,semList,semTransac,0,(CourseSiteGeneratorApp) app);
+                    app.processTransaction(newEdit);            
+                }else{
+                    if((!(semTransac.get(semTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(semTransac.get(semTransac.size()-1).equalsIgnoreCase("redo")))){
+                        semTransac.add("Edit");
+                        ArrayList<String> semList = props.getPropertyOptionsList("SEMESTER_OPTIONS");
+                        CBEdit_Transaction newEdit = new CBEdit_Transaction(semCB,semText,newText,semList,semTransac,0,(CourseSiteGeneratorApp) app);
+                        app.processTransaction(newEdit);
+                    }else{
+                        if (semTransac.get(semTransac.size()-1).equalsIgnoreCase("undo") || semTransac.get(semTransac.size()-1).equalsIgnoreCase("redo")) {
+                            for (int i = semTransac.size()-1; i >= 0 ; i--) {
+                                if (semTransac.get(i).equalsIgnoreCase("Undo")) {
+                                    semTransac.remove(i);
+                                }else if(semTransac.get(i).equalsIgnoreCase("redo")){
+                                    semTransac.remove(i);
+                                }
+                            }
+                        }
                     }
                 }
-                
             }
-            new CourseSiteGeneratorFiles((CourseSiteGeneratorApp)app).saveOptions();
-            HBox exportDirBox = ((HBox) gui.getGUINode(CSG_DIR_BOX));
-            exportDirBox.getChildren().remove(exportDirBox.getChildren().size()-1);
-            Label dirText = new Label(".\\export\\"+subjCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            numCB.getSelectionModel().getSelectedItem().toString()+"_"+semCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            yearCB.getSelectionModel().getSelectedItem().toString()+"\\public_html");
-            exportDirBox.getChildren().add(dirText);
         });
         yearCB.setOnAction(e -> {
-            ArrayList<String> yearList = props.getPropertyOptionsList("YEAR_OPTIONS");
-            boolean exists = false;
-            for (int i = 0; i < yearList.size(); i++) {
-                if(yearCB.getSelectionModel().getSelectedItem().toString().equals (yearList.get(i))){
-                    exists = true;
-                    break;
-                }
-            }
-            if(!exists){
-                
-                props.getPropertyOptionsList("YEAR_OPTIONS").add(yearCB.getSelectionModel().getSelectedItem().toString());
-                for (int i = 0; i < props.getPropertyOptionsList("YEAR_OPTIONS").size(); i++) {
-                    boolean inList = false;
-                    for (int j = 0; j < yearCB.getItems().size(); j++) {
-                        if (yearCB.getItems().get(j).equals(props.getPropertyOptionsList("YEAR_OPTIONS").get(i))) {
-                            inList = true;
+            String newText = (String)yearCB.getValue();
+            if (!newText.equals(yearText)) {
+                if(yearTransac.isEmpty()){
+                    yearTransac.add("Edit");
+                    ArrayList<String> yearList = props.getPropertyOptionsList("YEAR_OPTIONS");
+                    CBEdit_Transaction newEdit = new CBEdit_Transaction(yearCB,yearText,newText,yearList,yearTransac,1,(CourseSiteGeneratorApp) app);
+                    app.processTransaction(newEdit);            
+                }else{
+                    if((!(yearTransac.get(yearTransac.size()-1).equalsIgnoreCase("Undo")))&& (!(yearTransac.get(yearTransac.size()-1).equalsIgnoreCase("redo")))){
+                        yearTransac.add("Edit");
+                        ArrayList<String> yearList = props.getPropertyOptionsList("YEAR_OPTIONS");
+                        CBEdit_Transaction newEdit = new CBEdit_Transaction(yearCB,yearText,newText,yearList,yearTransac,1,(CourseSiteGeneratorApp) app);
+                        app.processTransaction(newEdit);
+                    }else{
+                        if (yearTransac.get(yearTransac.size()-1).equalsIgnoreCase("undo") || yearTransac.get(yearTransac.size()-1).equalsIgnoreCase("redo")) {
+                            for (int i = yearTransac.size()-1; i >= 0 ; i--) {
+                                if (yearTransac.get(i).equalsIgnoreCase("Undo")) {
+                                    yearTransac.remove(i);
+                                }else if(yearTransac.get(i).equalsIgnoreCase("redo")){
+                                    yearTransac.remove(i);
+                                }
+                            }
                         }
                     }
-                    if(!inList){
-                        yearCB.getItems().add(props.getPropertyOptionsList("YEAR_OPTIONS").get(i));
-                        
-                    }
                 }
-                
             }
-            new CourseSiteGeneratorFiles((CourseSiteGeneratorApp)app).saveOptions();
-            HBox exportDirBox = ((HBox) gui.getGUINode(CSG_DIR_BOX));
-            exportDirBox.getChildren().remove(exportDirBox.getChildren().size()-1);
-            Label dirText = new Label(".\\export\\"+subjCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            numCB.getSelectionModel().getSelectedItem().toString()+"_"+semCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            yearCB.getSelectionModel().getSelectedItem().toString()+"\\public_html");
-            exportDirBox.getChildren().add(dirText);
         });
         
         numCB.setOnAction(e -> {
-            ArrayList<String> numList = props.getPropertyOptionsList("NUMBER_OPTIONS");
-            boolean exists = false;
-            for (int i = 0; i < numList.size(); i++) {
-                if(numCB.getSelectionModel().getSelectedItem().toString().equals (numList.get(i))){
-                    exists = true;
-                    break;
-                }
-            }
-            if(!exists){
-                
-                props.getPropertyOptionsList("NUMBER_OPTIONS").add(numCB.getSelectionModel().getSelectedItem().toString());
-                for (int i = 0; i < props.getPropertyOptionsList("NUMBER_OPTIONS").size(); i++) {
-                    boolean inList = false;
-                    for (int j = 0; j < numCB.getItems().size(); j++) {
-                        if (numCB.getItems().get(j).equals(props.getPropertyOptionsList("NUMBER_OPTIONS").get(i))) {
-                            inList = true;
+            String newText = (String)numCB.getValue();
+            if (!newText.equals(numText)) {
+                if(numTransac.isEmpty()){
+                    numTransac.add("Edit");
+                    ArrayList<String> numList = props.getPropertyOptionsList("NUMBER_OPTIONS");
+                    CBEdit_Transaction newEdit = new CBEdit_Transaction(numCB,numText,newText,numList,numTransac,2,(CourseSiteGeneratorApp) app);
+                    app.processTransaction(newEdit);            
+                }else{
+                    if((!(numTransac.get(numTransac.size()-1).equalsIgnoreCase("Undo")))&& (!(numTransac.get(numTransac.size()-1).equalsIgnoreCase("redo")))){
+                        numTransac.add("Edit");
+                        ArrayList<String> numList = props.getPropertyOptionsList("NUMBER_OPTIONS");
+                        CBEdit_Transaction newEdit = new CBEdit_Transaction(numCB,numText,newText,numList,numTransac,2,(CourseSiteGeneratorApp) app);
+                        app.processTransaction(newEdit);
+                    }else{
+                        if (numTransac.get(numTransac.size()-1).equalsIgnoreCase("undo") || numTransac.get(numTransac.size()-1).equalsIgnoreCase("redo")) {
+                            for (int i = numTransac.size()-1; i >= 0 ; i--) {
+                                if (numTransac.get(i).equalsIgnoreCase("Undo")) {
+                                    numTransac.remove(i);
+                                }else if (numTransac.get(i).equalsIgnoreCase("redo")) {
+                                    numTransac.remove(i);
+                                }
+                            }
                         }
                     }
-                    if(!inList){
-                        numCB.getItems().add(props.getPropertyOptionsList("NUMBER_OPTIONS").get(i));
-                        
-                    }
                 }
-                
             }
-            new CourseSiteGeneratorFiles((CourseSiteGeneratorApp)app).saveOptions();
-            HBox exportDirBox = ((HBox) gui.getGUINode(CSG_DIR_BOX));
-            exportDirBox.getChildren().remove(exportDirBox.getChildren().size()-1);
-            Label dirText = new Label(".\\export\\"+subjCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            numCB.getSelectionModel().getSelectedItem().toString()+"_"+semCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            yearCB.getSelectionModel().getSelectedItem().toString()+"\\public_html");
-            exportDirBox.getChildren().add(dirText);
         });
         subjCB.setOnAction(e -> {
-            ArrayList<String> subjList = props.getPropertyOptionsList("SUBJECT_OPTIONS");
-            boolean exists = false;
-            for (int i = 0; i < subjList.size(); i++) {
-                if(subjCB.getSelectionModel().getSelectedItem().toString().equals (subjList.get(i))){
-                    exists = true;
-                    break;
+            String newText = (String)subjCB.getValue();
+            if (!newText.equals(subjText)) {
+                if(subjTransac.isEmpty()){
+                    subjTransac.add("Edit");
+                    ArrayList<String> subjList = props.getPropertyOptionsList("SUBJECT_OPTIONS");
+                    CBEdit_Transaction newEdit = new CBEdit_Transaction(subjCB,subjText,newText,subjList,subjTransac,3,(CourseSiteGeneratorApp) app);
+                    app.processTransaction(newEdit);            
+                }else{
+                    if((!(subjTransac.get(subjTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(subjTransac.get(subjTransac.size()-1).equalsIgnoreCase("redo")))){
+                        subjTransac.add("Edit");
+                        ArrayList<String> subjList = props.getPropertyOptionsList("SUBJECT_OPTIONS");
+                        CBEdit_Transaction newEdit = new CBEdit_Transaction(subjCB,subjText,newText,subjList,subjTransac,3,(CourseSiteGeneratorApp) app);
+                        app.processTransaction(newEdit);
+                    }else{
+                        if (subjTransac.get(subjTransac.size()-1).equalsIgnoreCase("undo") || subjTransac.get(subjTransac.size()-1).equalsIgnoreCase("redo")) {
+                            for (int i = subjTransac.size()-1; i >= 0 ; i--) {
+                                if (subjTransac.get(i).equalsIgnoreCase("Undo")) {
+                                    subjTransac.remove(i);
+                                }else if (subjTransac.get(i).equalsIgnoreCase("redo")) {
+                                    subjTransac.remove(i);
+                                } 
+                            }
+                        }                       
+                    }
                 }
             }
-            if(!exists){
-                
-                props.getPropertyOptionsList("SUBJECT_OPTIONS").add(subjCB.getSelectionModel().getSelectedItem().toString());
-                for (int i = 0; i < props.getPropertyOptionsList("SUBJECT_OPTIONS").size(); i++) {
-                    boolean inList = false;
-                    for (int j = 0; j < subjCB.getItems().size(); j++) {
-                        if (subjCB.getItems().get(j).equals(props.getPropertyOptionsList("SUBJECT_OPTIONS").get(i))) {
-                            inList = true;
-                        }
-                    }
-                    if(!inList){
-                        subjCB.getItems().add(props.getPropertyOptionsList("SUBJECT_OPTIONS").get(i));
-                        
-                    }
-                }
-                
-            }
-            new CourseSiteGeneratorFiles((CourseSiteGeneratorApp)app).saveOptions();
-            HBox exportDirBox = ((HBox) gui.getGUINode(CSG_DIR_BOX));
-            exportDirBox.getChildren().remove(exportDirBox.getChildren().size()-1);
-            Label dirText = new Label(".\\export\\"+subjCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            numCB.getSelectionModel().getSelectedItem().toString()+"_"+semCB.getSelectionModel().getSelectedItem().toString()+"_"+
-            yearCB.getSelectionModel().getSelectedItem().toString()+"\\public_html");
-            exportDirBox.getChildren().add(dirText);
         });
         RadioButton all = (RadioButton) gui.getGUINode(CSG_TAS_RADIO_BUTTON_ALL);
         RadioButton undergradButton = (RadioButton) gui.getGUINode(CSG_TAS_RADIO_BUTTON_UG);
@@ -1553,23 +1637,179 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
             app.processTransaction(addRec);
         });
         ((Button) gui.getGUINode(CSG_REMOVE_LECT_BUTTON)).setOnAction(e -> {
-            Lecture newLect = new Lecture("?","?","?","?");
+            Lecture newLect =  (Lecture)(((TableView) gui.getGUINode(CSG_LECT_TABLE_VIEW)).getSelectionModel().getSelectedItem());
             AddLecture_Transaction addLect = new AddLecture_Transaction((CourseSiteGeneratorData)app.getDataComponent(),newLect,false);
             app.processTransaction(addLect);
         });
         ((Button) gui.getGUINode(CSG_REMOVE_LAB_BUTTON)).setOnAction(e -> {
-            Lab_Recitation newLab = new Lab_Recitation("?","?","?","?","?");
+            Lab_Recitation newLab = (Lab_Recitation)(((TableView) gui.getGUINode(CSG_LAB_TABLE_VIEW)).getSelectionModel().getSelectedItem());
             AddLab_Rec_Transaction addLab = new AddLab_Rec_Transaction((CourseSiteGeneratorData)app.getDataComponent(),newLab,"Lab",false);
             app.processTransaction(addLab);
         });
         ((Button) gui.getGUINode(CSG_REMOVE_REC_BUTTON)).setOnAction(e -> {
-            Lab_Recitation newRec = new Lab_Recitation("?","?","?","?","?");
+            Lab_Recitation newRec = (Lab_Recitation)(((TableView) gui.getGUINode(CSG_REC_TABLE_VIEW)).getSelectionModel().getSelectedItem());
             AddLab_Rec_Transaction addRec = new AddLab_Rec_Transaction((CourseSiteGeneratorData)app.getDataComponent(),newRec,"Rec",false);
             app.processTransaction(addRec);
         });
         //EVENT HANDLING FOR MEETING TIMES TV
+        TableView secTV = ((TableView) gui.getGUINode(CSG_LECT_TABLE_VIEW));
         TableColumn secLect = (TableColumn)(((TableView) gui.getGUINode(CSG_LECT_TABLE_VIEW)).getColumns().get(0));
-        //
+        TableColumn daysLect = (TableColumn)(((TableView) gui.getGUINode(CSG_LECT_TABLE_VIEW)).getColumns().get(1));
+        TableColumn timeLect = (TableColumn)(((TableView) gui.getGUINode(CSG_LECT_TABLE_VIEW)).getColumns().get(2));
+        TableColumn roomLect = (TableColumn)(((TableView) gui.getGUINode(CSG_LECT_TABLE_VIEW)).getColumns().get(3));     
+        secLect.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lecture,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lecture,String> event){
+                String currentText = (((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())).getSection());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLecture_Transaction newEdit = new EditLecture_Transaction(((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,0,event.getNewValue(),secTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        daysLect.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lecture,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lecture,String> event){
+                String currentText = (((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())).getDays());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLecture_Transaction newEdit = new EditLecture_Transaction(((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,1,event.getNewValue(),secTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        timeLect.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lecture,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lecture,String> event){
+                String currentText = (((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())).getTime());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLecture_Transaction newEdit = new EditLecture_Transaction(((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,2,event.getNewValue(),secTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        roomLect.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lecture,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lecture,String> event){
+                String currentText = (((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())).getRoom());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLecture_Transaction newEdit = new EditLecture_Transaction(((Lecture) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,3,event.getNewValue(),secTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        TableView recTV = ((TableView) gui.getGUINode(CSG_REC_TABLE_VIEW));
+        TableColumn secRec = (TableColumn)(recTV.getColumns().get(0));
+        TableColumn daysRec = (TableColumn)(recTV.getColumns().get(1));
+        TableColumn roomRec = (TableColumn)(recTV.getColumns().get(2));
+        TableColumn ta1Rec = (TableColumn)(recTV.getColumns().get(3));
+        TableColumn ta2Rec = (TableColumn)(recTV.getColumns().get(4));
+        secRec.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getSection());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,0,event.getNewValue(),recTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        daysRec.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getDays());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,1,event.getNewValue(),recTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        roomRec.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getRoom());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,2,event.getNewValue(),recTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        ta1Rec.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getTA1());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,3,event.getNewValue(),recTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        ta2Rec.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getTA2());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,4,event.getNewValue(),recTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        TableView labTV = ((TableView) gui.getGUINode(CSG_LAB_TABLE_VIEW));
+        TableColumn secLab = (TableColumn)(labTV.getColumns().get(0));
+        TableColumn daysLab = (TableColumn)(labTV.getColumns().get(1));
+        TableColumn roomLab = (TableColumn)(labTV.getColumns().get(2));
+        TableColumn ta1Lab = (TableColumn)(labTV.getColumns().get(3));
+        TableColumn ta2Lab = (TableColumn)(labTV.getColumns().get(4));
+        secLab.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getSection());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,0,event.getNewValue(),labTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        daysLab.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getDays());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,1,event.getNewValue(),labTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        roomLab.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getRoom());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,2,event.getNewValue(),labTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        ta1Lab.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getTA1());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,3,event.getNewValue(),labTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        ta2Lab.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent<Lab_Recitation,String>>(){
+            @Override
+            public void handle(TableColumn.CellEditEvent<Lab_Recitation,String> event){
+                String currentText = (((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())).getTA2());
+                if (!currentText.equals(event.getNewValue())) {
+                    EditLab_Recitation_Transaction newEdit = new EditLab_Recitation_Transaction(((Lab_Recitation) event.getTableView().getItems().get(event.getTablePosition().getRow())),currentText,4,event.getNewValue(),labTV);
+                    app.processTransaction(newEdit);
+                }
+            }
+        });
+        //SCHED TABLE UPDATE
         ((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).setOnMouseClicked(e -> {
             ObservableList schedTV = ((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).getSelectionModel().getSelectedCells();
             ObservableList schedColObs = ((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).getColumns();
@@ -1582,6 +1822,14 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
             Object titleVal = ((TableColumn)((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).getColumns().get(2)).getCellData(tablePosition.getRow());
             Object topicVal = ((TableColumn)((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).getColumns().get(3)).getCellData(tablePosition.getRow());
             if(e.getClickCount() == 2 && !(titleVal.toString().equals(""))){
+                String fullDay = dateVal.toString();
+                String month = fullDay.substring(0,2);
+                String day = fullDay.substring(3,5);
+                String year = fullDay.substring(6,10);
+                Date pickedDate = new Date(Integer.parseInt(year),Integer.parseInt(month)-1,Integer.parseInt(day));
+                DatePicker datePicker = ((DatePicker)((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().get(((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().size()-1));
+                LocalDate locDate = LocalDate.of(pickedDate.getYear(),pickedDate.getMonth()+1,pickedDate.getDate());
+                datePicker.setValue(locDate);
                 ((ComboBox) gui.getGUINode(CSG_TYPE_CB)).getSelectionModel().select(typeVal.toString());
                 ((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).setText(titleVal.toString());
                 ((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).setText(topicVal.toString());
@@ -1599,10 +1847,14 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
                 String date = fullDate.substring(fullDate.length()-2,fullDate.length());
                 fullDate = month+"/"+date+"/"+year;
                 SchedItem updateSchedItem = new SchedItem(((ComboBox) gui.getGUINode(CSG_TYPE_CB)).getSelectionModel().getSelectedItem().toString(),fullDate,((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).getText(),((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).getText(),((TextField) gui.getGUINode(CSG_ADD_LINK_TF)).getText());
-                EditSchedItem_Transaction updateItem = new EditSchedItem_Transaction((CourseSiteGeneratorData)app.getDataComponent(),updateSchedItem,currentItem);
+                EditSchedItem_Transaction updateItem = new EditSchedItem_Transaction((CourseSiteGeneratorData)app.getDataComponent(),updateSchedItem,currentItem,(CourseSiteGeneratorApp)app);
                 app.processTransaction(updateItem);
                 ((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
                 isUpdate = false;
+                ((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).setText("");
+                ((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).setText("");
+                ((TextField) gui.getGUINode(CSG_ADD_LINK_TF)).setText("");
+                
             }else{
                 DatePicker pickedDate = ((DatePicker)((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().get(((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().size()-1));
                 String year = ""+ pickedDate.getValue().getYear();
@@ -1615,6 +1867,345 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
                 app.processTransaction(addItem);
                 ((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
             }
+        });
+        ((Button) gui.getGUINode(CSG_REM_ITEM_BUTTON)).setOnAction(e -> {
+            SchedItem currentItem = (SchedItem)(((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).getSelectionModel().getSelectedItem());
+            AddSchedItem_Transaction addItem = new AddSchedItem_Transaction((CourseSiteGeneratorData)app.getDataComponent(),currentItem,false);
+            app.processTransaction(addItem);
+            ((TableView) gui.getGUINode(CSG_SCHED_TABLE_VIEW)).refresh();
+        });
+        //TEXTFIELD EVENT HANDLING
+        titleText = ((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)).getText();
+        instrNameText = ((TextField) gui.getGUINode(CSG_INSTR_NAMETF)).getText();
+        instrRoomText = ((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)).getText();
+        instrEmailText = ((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)).getText();
+        instrHPText = ((TextField) gui.getGUINode(CSG_INSTR_PAGETF)).getText();
+        instrOHText = ((TextArea) gui.getGUINode(CSG_OH_TEXTFIELD)).getText();
+        descText = ((TextArea) gui.getGUINode(CSG_OH_TEXTFIELD)).getText();
+        topicsText = ((TextArea) gui.getGUINode(CSG_TOPICS_TEXTFIELD)).getText();
+        preqText = ((TextArea) gui.getGUINode(CSG_PREQ_TEXTFIELD)).getText();
+        ocText = ((TextArea) gui.getGUINode(CSG_OUTCOMES_TEXTFIELD)).getText();
+        tbText = ((TextArea)gui.getGUINode(CSG_TXTBKS_TEXTFIELD)).getText();
+        gcText = ((TextArea) gui.getGUINode(CSG_GC_TEXTFIELD)).getText();
+        gnText = ((TextArea) gui.getGUINode(CSG_GN_TEXTFIELD)).getText();
+        adText = ((TextArea) gui.getGUINode(CSG_AD_TEXTFIELD)).getText();
+        saText = ((TextArea) gui.getGUINode(CSG_SA_TEXTFIELD)).getText();
+        schedTitle = ((TextField)gui.getGUINode(CSG_ADD_TITLE_TF)).getText();
+        schedTopic = ((TextField)gui.getGUINode(CSG_ADD_TOPIC_TF)).getText();
+        schedLink = ((TextField)gui.getGUINode(CSG_ADD_LINK_TF)).getText();
+        ((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)).getText();
+            if (!titleText.equals(newText)) {        
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)),titleText,newText,"TF",0,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)).getText();
+            if (!titleText.equals(newText)) {        
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_TITLE_TEXT_FIELD)),titleText,newText,"TF",0,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        
+        ((TextField) gui.getGUINode(CSG_INSTR_NAMETF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_NAMETF)).getText();
+            if (!instrNameText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_NAMETF)),instrNameText,newText,"TF",1,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_INSTR_NAMETF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_NAMETF)).getText();
+            if (!instrNameText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_NAMETF)),instrNameText,newText,"TF",1,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        
+        ((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)).getText();
+            if (!instrRoomText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)),instrRoomText,newText,"TF",2,this);
+                app.processTransaction(newEdit);
+            }
+        });
+         ((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)).getText();
+            if (!instrRoomText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_ROOMTF)),instrRoomText,newText,"TF",2,this);
+                app.processTransaction(newEdit);
+            }
+        });
+         
+        ((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)).getText();
+            if (!instrEmailText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)),instrEmailText,newText,"TF",3,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)).getText();
+            if (!instrEmailText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_EMAILTF)),instrEmailText,newText,"TF",3,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        
+        ((TextField) gui.getGUINode(CSG_INSTR_PAGETF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_PAGETF)).getText();
+            if (!instrHPText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_PAGETF)),instrHPText,newText,"TF",4,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_INSTR_PAGETF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_INSTR_PAGETF)).getText();
+            if (!instrHPText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_INSTR_PAGETF)),instrHPText,newText,"TF",4,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        
+        ((TextArea) gui.getGUINode(CSG_OH_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_OH_TEXTFIELD)).getText();
+            if (!instrOHText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_OH_TEXTFIELD)),instrOHText,newText,"TextArea",5,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_DESC_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_DESC_TEXTFIELD)).getText();
+            if (!descText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_DESC_TEXTFIELD)),descText,newText,"TextArea",6,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_TOPICS_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_TOPICS_TEXTFIELD)).getText();
+            if (!topicsText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_TOPICS_TEXTFIELD)),topicsText,newText,"TextArea",7,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_PREQ_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_PREQ_TEXTFIELD)).getText();
+            if (!preqText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_PREQ_TEXTFIELD)),preqText,newText,"TextArea",8,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_OUTCOMES_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_OUTCOMES_TEXTFIELD)).getText();
+            if (!ocText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_OUTCOMES_TEXTFIELD)),ocText,newText,"TextArea",9,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_TXTBKS_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_TXTBKS_TEXTFIELD)).getText();
+            if (!tbText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_TXTBKS_TEXTFIELD)),tbText,newText,"TextArea",10,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_GC_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_GC_TEXTFIELD)).getText();
+            if (!gcText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_GC_TEXTFIELD)),gcText,newText,"TextArea",11,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_GN_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_GN_TEXTFIELD)).getText();
+            if (!gnText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_GN_TEXTFIELD)),gnText,newText,"TextArea",12,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_AD_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_AD_TEXTFIELD)).getText();
+            if (!adText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_AD_TEXTFIELD)),adText,newText,"TextArea",13,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextArea) gui.getGUINode(CSG_SA_TEXTFIELD)).focusedProperty().addListener(e ->{
+            String newText = ((TextArea) gui.getGUINode(CSG_SA_TEXTFIELD)).getText();
+            if (!saText.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextArea) gui.getGUINode(CSG_SA_TEXTFIELD)),saText,newText,"TextArea",14,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        DatePicker stMonPicker = (DatePicker)(((HBox) gui.getGUINode(CSG_STMON_PANE)).getChildren().get(((HBox) gui.getGUINode(CSG_STMON_PANE)).getChildren().size()-1));
+        DatePicker stFriPicker = (DatePicker)(((HBox) gui.getGUINode(CSG_STFRI_PANE)).getChildren().get(((HBox) gui.getGUINode(CSG_STFRI_PANE)).getChildren().size()-1));
+        DatePicker addPicker = (DatePicker)(((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().get(((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().size()-1));
+        oldMon = stMonPicker.getValue().toString();
+        oldFri = stFriPicker.getValue().toString();
+        oldDate = addPicker.getValue().toString();
+        addPicker.setOnAction(e ->{
+            String newPickedDate = addPicker.getValue().toString();
+            if (!newPickedDate.equals(oldDate)) {
+                if (dateTransac.isEmpty()) {
+                    dateTransac.add("edit");
+                    DatePicker_Transaction newDate = new DatePicker_Transaction(addPicker,newPickedDate,oldDate,2,this,dateTransac);
+                    app.processTransaction(newDate);
+                }else{
+                    if((!(dateTransac.get(dateTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(dateTransac.get(dateTransac.size()-1).equalsIgnoreCase("redo"))) && (!(dateTransac.get(dateTransac.size()-1).equalsIgnoreCase("clear")))){
+                        dateTransac.add("edit");
+                        DatePicker_Transaction newDate = new DatePicker_Transaction(addPicker,newPickedDate,oldDate,2,this,dateTransac);
+                        app.processTransaction(newDate);
+                    }else{
+                        if (dateTransac.get(dateTransac.size()-1).equalsIgnoreCase("undo") || dateTransac.get(dateTransac.size()-1).equalsIgnoreCase("redo")) {
+                           for (int i = dateTransac.size()-1; i >= 0 ; i--) {
+                                if (dateTransac.get(i).equalsIgnoreCase("Undo")) {
+                                    dateTransac.remove(i);
+                                }else if (dateTransac.get(i).equalsIgnoreCase("redo")) {
+                                    dateTransac.remove(i);
+                                } 
+                            } 
+                        }else if(dateTransac.get(dateTransac.size()-1).equalsIgnoreCase("clear")){
+                            for (int i = dateTransac.size()-1; i >= 0 ; i--) {
+                                if (dateTransac.get(i).equalsIgnoreCase("clear")) {
+                                    dateTransac.remove(i);
+                                }
+                            } 
+                        }
+                    }
+                }
+            }
+        });
+        stMonPicker.setOnAction(e ->{
+            String newMon = stMonPicker.getValue().toString();
+            if (!newMon.equals(oldMon)) {
+                if(stMonPicker.getValue().isBefore(stMonPicker.getValue())){
+                    if (monTransac.isEmpty()) {
+                        monTransac.add("edit");
+                        DatePicker_Transaction newDate = new DatePicker_Transaction(stMonPicker,newMon,oldMon,0,this,monTransac);
+                        app.processTransaction(newDate);
+                    }else{
+                        if((!(monTransac.get(monTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(monTransac.get(monTransac.size()-1).equalsIgnoreCase("redo")))){
+                            monTransac.add("edit");
+                            DatePicker_Transaction newDate = new DatePicker_Transaction(stMonPicker,newMon,oldMon,0,this,monTransac);
+                            app.processTransaction(newDate);
+                        }else{
+                            if (monTransac.get(monTransac.size()-1).equalsIgnoreCase("undo") || monTransac.get(monTransac.size()-1).equalsIgnoreCase("redo")) {
+                               for (int i = monTransac.size()-1; i >= 0 ; i--) {
+                                    if (monTransac.get(i).equalsIgnoreCase("Undo")) {
+                                        monTransac.remove(i);
+                                    }else if (monTransac.get(i).equalsIgnoreCase("redo")) {
+                                        monTransac.remove(i);
+                                    } 
+                                } 
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        stFriPicker.setOnAction(e ->{
+            String newFri = stFriPicker.getValue().toString();
+            if (!newFri.equals(oldFri)) {
+                if(stMonPicker.getValue().isBefore(stFriPicker.getValue())){
+                    if (friTransac.isEmpty()) {
+                        friTransac.add("edit");
+                        DatePicker_Transaction newDate = new DatePicker_Transaction(stFriPicker,newFri,oldFri,1,this,friTransac);
+                        app.processTransaction(newDate);
+                    }else{
+                        if((!(friTransac.get(friTransac.size()-1).equalsIgnoreCase("Undo"))) && (!(friTransac.get(friTransac.size()-1).equalsIgnoreCase("redo")))){
+                            friTransac.add("edit");
+                            DatePicker_Transaction newDate = new DatePicker_Transaction(stFriPicker,newFri,oldFri,1,this,friTransac);
+                            app.processTransaction(newDate);
+                        }else{
+                            if (friTransac.get(friTransac.size()-1).equalsIgnoreCase("undo") || friTransac.get(friTransac.size()-1).equalsIgnoreCase("redo")) {
+                               for (int i = friTransac.size()-1; i >= 0 ; i--) {
+                                    if (friTransac.get(i).equalsIgnoreCase("Undo")) {
+                                        friTransac.remove(i);
+                                    }else if (friTransac.get(i).equalsIgnoreCase("redo")) {
+                                        friTransac.remove(i);
+                                    } 
+                                } 
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        //SCHED TAB ADD EVENT HANDLER
+        ((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).getText();
+            if (!schedTitle.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)),schedTitle,newText,"TF",15,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)).getText();
+            if (!schedTitle.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_ADD_TITLE_TF)),schedTitle,newText,"TF",15,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        
+        ((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).getText();
+            if (!schedTopic.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)),schedTopic,newText,"TF",16,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)).getText();
+            if (!schedTopic.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_ADD_TOPIC_TF)),schedTopic,newText,"TF",16,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        
+        ((TextField) gui.getGUINode(CSG_ADD_LINK_TF)).setOnAction(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_ADD_LINK_TF)).getText();
+            if (!schedLink.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_ADD_LINK_TF)),schedLink,newText,"TF",17,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        ((TextField) gui.getGUINode(CSG_ADD_LINK_TF)).focusedProperty().addListener(e -> {
+            String newText = ((TextField) gui.getGUINode(CSG_ADD_LINK_TF)).getText();
+            if (!schedLink.equals(newText)) {
+                TextEdit_Transaction newEdit = new TextEdit_Transaction(((TextField) gui.getGUINode(CSG_ADD_LINK_TF)),schedLink,newText,"TF",17,this);
+                app.processTransaction(newEdit);
+            }
+        });
+        //CHECKBOX HANDLER
+        ((CheckBox) gui.getGUINode(CSG_HOME_PAGE_BUTTON)).setOnAction(e -> {
+            Boolean isSelected = ((CheckBox) gui.getGUINode(CSG_HOME_PAGE_BUTTON)).isSelected();
+            CheckBox_Transaction check = new CheckBox_Transaction(((CheckBox) gui.getGUINode(CSG_HOME_PAGE_BUTTON)),isSelected);
+            app.processTransaction(check);
+        });
+        ((CheckBox) gui.getGUINode(CSG_SYLLABUS_PAGE_BUTTON)).setOnAction(e -> {
+            Boolean isSelected = ((CheckBox) gui.getGUINode(CSG_SYLLABUS_PAGE_BUTTON)).isSelected();
+            CheckBox_Transaction check = new CheckBox_Transaction(((CheckBox) gui.getGUINode(CSG_SYLLABUS_PAGE_BUTTON)),isSelected);
+            app.processTransaction(check);
+        });
+        ((CheckBox) gui.getGUINode(CSG_SCHEDULE_PAGE_BUTTON)).setOnAction(e -> {
+            Boolean isSelected = ((CheckBox) gui.getGUINode(CSG_SCHEDULE_PAGE_BUTTON)).isSelected();
+            CheckBox_Transaction check = new CheckBox_Transaction(((CheckBox) gui.getGUINode(CSG_SCHEDULE_PAGE_BUTTON)),isSelected);
+            app.processTransaction(check);
+        });
+        ((CheckBox) gui.getGUINode(CSG_HW_PAGE_BUTTON)).setOnAction(e -> {
+            Boolean isSelected = ((CheckBox) gui.getGUINode(CSG_HW_PAGE_BUTTON)).isSelected();
+            CheckBox_Transaction check = new CheckBox_Transaction(((CheckBox) gui.getGUINode(CSG_HW_PAGE_BUTTON)),isSelected);
+            app.processTransaction(check);
+        });
+        ((Button) gui.getGUINode(CSG_CLEAR_ITEM_BUTTON)).setOnAction(e -> {
+            DatePicker datePicker = (DatePicker)(((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().get(((HBox) gui.getGUINode(CSG_ADD_DATE_PANE)).getChildren().size()-1));
+            TextField titleTF = ((TextField)gui.getGUINode(CSG_ADD_TITLE_TF));
+            TextField topicTF = ((TextField)gui.getGUINode(CSG_ADD_TOPIC_TF));
+            TextField linkTF = ((TextField)gui.getGUINode(CSG_ADD_LINK_TF));
+            SchedItem oldItem = new SchedItem(typeText,oldDate,titleTF.getText(),topicTF.getText(),linkTF.getText());
+            ClearItem_Transaction clear = new ClearItem_Transaction(typeCB,datePicker,titleTF,topicTF,linkTF,oldItem,typeTransac,dateTransac,this);
+            app.processTransaction(clear);
         });
     } 
     private void initFoolproofDesign(){
@@ -1635,5 +2226,68 @@ public class CourseSiteGeneratorWorkspace extends AppWorkspaceComponent {
         imageList.add(lfootFP);
         imageList.add(rfootFP);
         return imageList;
+    }
+    public void textEdit(int editString, String editText){
+        if (editString == 0) {
+            titleText = editText;
+        }else if(editString == 1){
+            instrNameText = editText;
+        }else if(editString == 2){
+            instrRoomText = editText;
+        }else if(editString == 3){
+            instrEmailText = editText;
+        }else if(editString == 4){
+             instrHPText = editText;
+        }else if(editString == 5){
+            instrOHText = editText;
+        }else if(editString == 6){
+            descText = editText;
+        }else if(editString == 7){
+            topicsText = editText;        
+        }else if(editString == 8){
+            preqText = editText;
+        }else if(editString == 9){
+            ocText = editText;
+        }else if(editString == 10){
+            tbText = editText;
+        }else if(editString == 11){
+            gcText = editText;
+        }else if(editString == 12){
+            gnText = editText;
+        }else if(editString == 13){
+            adText = editText;
+        }else if(editString == 14){
+            saText = editText;            
+        }else if(editString == 15){
+            schedTitle = editText;            
+        }else if(editString == 16){
+            schedTopic = editText;            
+        }else if(editString == 17){
+            schedLink = editText;            
+        }
+    }
+    public void cbEdit(int editNum, String editText){
+        if (editNum == 0) {
+            semText = editText;
+        }else if(editNum == 1){
+            yearText = editText;
+        }else if(editNum == 2){
+            numText = editText;
+        }else if(editNum == 3){
+            subjText = editText;
+        }else if(editNum == 4){
+            typeText = editText;
+        }else if(editNum == 5){
+            cssText = editText;
+        }
+    }
+    public void datePickEdit(int editNum,String editText){
+        if (editNum == 0) {
+            oldMon = editText;
+        }else if(editNum == 1){
+            oldFri = editText;
+        }else if(editNum == 2){
+            oldDate = editText;
+        }
     }
 }

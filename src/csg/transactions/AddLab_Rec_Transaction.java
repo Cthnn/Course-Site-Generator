@@ -41,7 +41,7 @@ public class AddLab_Rec_Transaction implements jTPS_Transaction {
 
     @Override
     public void undoTransaction() {
-        if (isAdd) {
+        if (!isAdd) {
             if (type.equalsIgnoreCase("Lab")) {
                 data.addLab(lab_rec);
             }else if (type.equalsIgnoreCase("Rec")) {

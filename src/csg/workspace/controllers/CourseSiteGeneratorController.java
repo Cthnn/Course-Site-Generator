@@ -76,7 +76,7 @@ public class CourseSiteGeneratorController {
             }
                 if(!dupliEmail){
                     TeachingAssistantPrototype ta = new TeachingAssistantPrototype(name,email,type);
-                    AddTA_Transaction addTATransaction = new AddTA_Transaction(data, ta);
+                    AddTA_Transaction addTATransaction = new AddTA_Transaction((CourseSiteGeneratorData)app.getDataComponent(),ta);
                     app.processTransaction(addTATransaction);
                     
                 }else{
